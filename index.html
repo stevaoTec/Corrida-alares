@@ -316,9 +316,35 @@
 #raceWorld.overview .car-unit {width:5.8%} #raceWorld.overview .js-svg-slot svg {width:100%;height:auto} #raceWorld.overview .js-rank-pill {display:none} #raceWorld.overview .js-sales-pill {font-size:9px} #raceWorld.overview .car-tag {border:0;background:#111827;padding:2px 0} #raceWorld.overview .car-tag>div {justify-content:center} header h1 {font-size:clamp(13px,4vw,21px)!important} header button {min-height:36px} footer {padding-bottom:max(5px,env(safe-area-inset-bottom))} 
 }
 @media(max-width:900px) and (max-height:550px){#raceWorld.focus .js-svg-slot svg{width:27px;height:48px} #raceWorld.focus .car-tag{padding:2px} #raceWorld.focus .js-carname{display:none} #mobileRaceNav{padding:3px 8px} .race-nav-row button{min-height:32px} #raceGroupLabel{margin-bottom:3px}}
+
+    #raceIntro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#17142f 0%,#713b68 47%,#e5a17c 75%,#181629 76%);color:white;isolation:isolate;transition:opacity .65s ease,visibility .65s}
+    #raceIntro.leaving{opacity:0;visibility:hidden;pointer-events:none}
+    #raceIntro .intro-sun{position:absolute;width:min(55vw,340px);aspect-ratio:1;border-radius:50%;background:linear-gradient(#ffe4a4,#e78281);top:12%;left:50%;transform:translateX(-50%);box-shadow:0 0 90px #ffb78966;animation:introGlow 5s ease-in-out infinite alternate;z-index:-2}
+    #raceIntro .intro-city{position:absolute;inset:0;width:100%;height:100%;z-index:-1;opacity:.92}
+    #raceIntro .intro-content{text-align:center;padding:24px;width:min(94%,600px);text-shadow:0 3px 22px #160d28;animation:introAppear .85s ease both}
+    #raceIntro .intro-kicker{font:700 11px Inter,sans-serif;letter-spacing:.35em;text-transform:uppercase}
+    #raceIntro h2{font-family:inherit;font-weight:900;font-style:italic;font-size:clamp(40px,9vw,92px);line-height:.94;letter-spacing:-.06em;margin:16px 0;color:#fff5e9}
+    #raceIntro .intro-edition{font-size:clamp(13px,3vw,22px);letter-spacing:.28em;color:#ffe2a7;font-weight:800}
+    #raceIntro button{margin-top:30px;min-height:52px;padding:14px 30px;border:1px solid #ffe2a7;border-radius:9px;background:#ffe2a7;color:#20172a;font-weight:900;letter-spacing:.1em;box-shadow:0 8px 35px #140d2855;cursor:pointer}
+    #raceIntro button:focus-visible{outline:3px solid white;outline-offset:5px}
+    #raceIntro .intro-note{font-size:12px;margin-top:12px;color:#fff1e5}
+    @keyframes introGlow{to{filter:brightness(1.12);box-shadow:0 0 130px #ffb78988}}
+    @keyframes introAppear{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @media(prefers-reduced-motion:reduce){#raceIntro,#raceIntro *{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body class="select-none">
+  <div id="raceIntro" role="dialog" aria-modal="true" aria-labelledby="raceIntroTitle">
+    <div class="intro-sun" aria-hidden="true"></div>
+    <svg class="intro-city" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <path fill="#33233d" d="M0 440V370H65V320H110V410H160V350H215V425H270V300H310V385H365V335H405V420H470V360H510V400H560V285H600V410H660V345H705V380H750V320H790V420H840V350H890V395H940V315H1000V600H0Z"/>
+      <path fill="#171625" d="M0 475Q250 430 500 470T1000 465V600H0Z"/>
+      <g fill="#171625" stroke="#171625" stroke-width="8" stroke-linecap="round"><path d="M100 540Q135 350 100 205M900 540Q865 350 900 205" fill="none"/><path d="M100 205Q15 145 5 225Q50 190 100 205Q30 225 35 285Q70 235 100 205Q155 135 205 185Q150 180 100 205Q190 200 200 265Q145 225 100 205ZM900 205Q985 145 995 225Q950 190 900 205Q970 225 965 285Q930 235 900 205Q845 135 795 185Q850 180 900 205Q810 200 800 265Q855 225 900 205Z"/></g>
+      <path d="M390 600L480 475H520L610 600" fill="#242436"/><path d="M500 600V565M500 550V525M500 510V490" stroke="#e7bd83" stroke-width="4"/>
+    </svg>
+    <div class="intro-content"><div class="intro-kicker">Alares apresenta</div><h2 id="raceIntroTitle">CORRIDA<br>ALARES</h2><div class="intro-edition">VICE EDITION</div><button id="raceIntroEnter" type="button">ENTRAR NA CORRIDA ▶</button><p class="intro-note">Entre para ativar a rádio e acompanhar a corrida.</p></div>
+  </div>
+
 
   <!-- ==================== SHELL PRINCIPAL (100dvh, SEM SCROLL VERTICAL) ==================== -->
   <div id="appShell" class="h-[100dvh] w-full flex flex-col overflow-hidden bg-vice-asphalt relative">
@@ -2918,6 +2944,15 @@
     // 11. EVENTOS DE INTERFACE
     // =========================================================================
     function bindAllEvents() {
+      const intro = document.getElementById('raceIntro');
+      const enter = document.getElementById('raceIntroEnter');
+      enter.addEventListener('click', () => {
+        try { radio.start(); } catch (err) { console.warn('Rádio:', err); }
+        intro.classList.add('leaving');
+        intro.setAttribute('aria-hidden','true');
+        document.getElementById('btnRadioPlay').focus({preventScroll:true});
+        setTimeout(() => intro.remove(), 700);
+      }, {once:true});
       // Rádio Vice City
       document.getElementById('btnRadioPlay').addEventListener('click', () => radio.toggle());
       document.getElementById('btnFloatRadioPrompt').addEventListener('click', () => radio.start());
