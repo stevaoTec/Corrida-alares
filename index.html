@@ -1012,6 +1012,11 @@
         this.sfxGain = null;
         this.isPlaying = false;
         this.stationIdx = 0;
+        this.customAudio = new Audio('./WhatsApp%20Audio%202026-11-24%20at%2014.26.02.mpeg');
+        this.customAudio.loop = true;
+        this.customAudio.preload = 'none';
+        this.customAudio.volume = 0.42;
+        this.customStation = true;
         this.volume = 0.42;
         this.step = 0;
         this.timer = null;
@@ -1050,6 +1055,7 @@
 
       setVolume(v01) {
         this.volume = Math.max(0, Math.min(1, v01));
+        this.customAudio.volume = this.volume;
         if (this.musicGain && this.ctx) {
           this.musicGain.gain.setTargetAtTime(this.volume * 0.55, this.ctx.currentTime, 0.05);
         }
@@ -1069,12 +1075,20 @@
         if (!ctx) return;
         if (this.isPlaying) return;
         this.isPlaying = true;
-        this.scheduleLoop();
+        if (this.customStation) {
+          this.customAudio.play().catch(() => {
+            if (!this.isPlaying || !this.customStation) return;
+            this.isPlaying = false;
+            updateRadioUI();
+            showToast('Rádio', 'Não foi possível tocar o áudio. Tente novamente.', 'pink');
+          });
+        } else this.scheduleLoop();
         updateRadioUI();
       }
 
       stop() {
         this.isPlaying = false;
+        this.customAudio.pause();
         if (this.timer) {
           clearInterval(this.timer);
           this.timer = null;
@@ -1083,14 +1097,15 @@
       }
 
       nextStation() {
-        this.stationIdx = (this.stationIdx + 1) % RADIO_STATIONS.length;
+        const wasPlaying = this.isPlaying;
+        this.stop();
+        if (this.customStation) { this.customStation = false; this.stationIdx = 0; }
+        else if (this.stationIdx === RADIO_STATIONS.length - 1) { this.customStation = true; }
+        else this.stationIdx++;
         this.step = 0;
-        if (this.isPlaying) {
-          clearInterval(this.timer);
-          this.scheduleLoop();
-        }
+        if (wasPlaying) this.start();
         updateRadioUI();
-        showToast('📻 Rádio Vice City', `Sintonizado em ${RADIO_STATIONS[this.stationIdx].name}`, 'pink');
+        showToast('📻 Rádio Vice City', `Sintonizado em ${this.customStation ? 'Corrida Alares' : RADIO_STATIONS[this.stationIdx].name}`, 'pink');
       }
 
       scheduleLoop() {
@@ -1320,7 +1335,7 @@
     function updateRadioUI() {
       const st = RADIO_STATIONS[radio.stationIdx];
       document.getElementById('radioPlayIcon').textContent = radio.isPlaying ? '⏸' : '▶';
-      document.getElementById('radioStationName').textContent = st.name;
+      document.getElementById('radioStationName').textContent = radio.customStation ? 'Corrida Alares' : st.name;
       document.getElementById('radioEqWrap').classList.toggle('eq-playing', radio.isPlaying);
       document.getElementById('btnFloatRadioPrompt').classList.toggle('hidden', radio.isPlaying);
     }
