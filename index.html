@@ -2990,10 +2990,14 @@
 
       document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const submit = e.currentTarget.querySelector('button[type=submit]');
+        if (submit.disabled) return;
+        submit.disabled = true;
+        document.getElementById('adminLoginErr').classList.add('hidden');
         try {
-          if (!auth || !fbReady || !window.AlaresAdminEmail) throw Error('Configuração ou conexão pendente');
+          if (!auth || !db || !signInWithEmailAndPassword || !window.AlaresAdminEmail) throw Error('Firebase ainda não inicializado. Aguarde e tente novamente.');
           const cred=await signInWithEmailAndPassword(auth,window.AlaresAdminEmail,passInput.value);
-          if ((await getDoc(doc(db,'admins',cred.user.uid))).data()?.enabled !== true) {await signOut(auth); throw Error('Sem permissão');}
+          if ((await getDoc(doc(db,'admins',cred.user.uid))).data()?.enabled !== true) {await signOut(auth); throw Error('Usuário autenticado, mas UID não autorizado na coleção admins.');}
           passInput.value='';
           isAdminAuth = true;
           loginModal.classList.add('hidden');
@@ -3002,9 +3006,14 @@
           renderAdminTabs();
           showToast('Command Center Liberado', 'Bem-vindo ao painel administrativo da Alares!', 'pink');
         } catch(err) {
-          document.getElementById('adminLoginErr').classList.remove('hidden');
+          const messages = {'auth/invalid-credential':'Senha incorreta ou usuário não cadastrado.','auth/wrong-password':'Senha incorreta.','auth/user-not-found':'Usuário não cadastrado.','auth/network-request-failed':'Falha de rede na autenticação.','auth/operation-not-allowed':'Ative E-mail/senha no Firebase Authentication.','auth/too-many-requests':'Muitas tentativas. Aguarde antes de tentar novamente.','permission-denied':'Firestore negou a autorização administrativa. Confira o UID e as regras.','unavailable':'Firestore indisponível. Confira a conexão.'};
+          isAdminAuth = false;
+          if (auth?.currentUser) await signOut(auth).catch(console.error);
+          const errorEl = document.getElementById('adminLoginErr');
+          errorEl.textContent = messages[err.code] || err.message || 'Falha de autenticação.';
+          errorEl.classList.remove('hidden');
           passInput.select();
-        }
+        } finally { submit.disabled = false; }
       });
 
       // Navegação do Painel Admin
