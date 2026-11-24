@@ -2997,7 +2997,11 @@
         try {
           if (!auth || !db || !signInWithEmailAndPassword || !window.AlaresAdminEmail) throw Error('Firebase ainda não inicializado. Aguarde e tente novamente.');
           const cred=await signInWithEmailAndPassword(auth,window.AlaresAdminEmail,passInput.value);
-          if ((await getDoc(doc(db,'admins',cred.user.uid))).data()?.enabled !== true) {await signOut(auth); throw Error('Usuário autenticado, mas UID não autorizado na coleção admins.');}
+          const adminSnap = await getDocFromServer(doc(db,'admins',cred.user.uid));
+          if (!adminSnap.exists() || adminSnap.data()?.enabled !== true) {
+            const reason = !adminSnap.exists() ? 'Documento não encontrado' : 'Campo enabled não é boolean true';
+            throw Error(reason + ' em admins/' + cred.user.uid + ' (projeto ' + db.app.options.projectId + ', banco padrão).');
+          }
           passInput.value='';
           isAdminAuth = true;
           loginModal.classList.add('hidden');
@@ -3236,14 +3240,14 @@
       el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${online ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}"></span> ${esc(text)}`;
     }
 
-    let signInWithEmailAndPassword, signOut, updatePassword, getDoc, runTransaction;
+    let signInWithEmailAndPassword, signOut, updatePassword, getDoc, getDocFromServer, runTransaction;
     async function initRealtimeCloud(){
       try {
         const cfg=window.AlaresFirebase;
         if(!cfg?.apiKey || cfg.apiKey.startsWith('PREENCHER')) {setSyncPill('Configurar Firebase',false);return;}
         ({initializeApp}=await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'));
         ({getAuth,signInWithEmailAndPassword,signOut,updatePassword}=await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js'));
-        ({getFirestore,doc,onSnapshot,getDoc,runTransaction}=await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js'));
+        ({getFirestore,doc,onSnapshot,getDoc,getDocFromServer,runTransaction}=await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js'));
         const app=initializeApp(cfg);auth=getAuth(app);db=getFirestore(app);
         await signOut(auth);
         campaignDocRef=doc(db,'campaigns','alares');
