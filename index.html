@@ -1,0 +1,3282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>CORRIDA ALARES — GTA VI Vice Edition | Feito por Estevão</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Tipografia GTA VI / Vice City + HUD Telemetria -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Yellowtail&display=swap" rel="stylesheet" />
+
+  <script>
+    if (window.tailwind) tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            vice: {
+              pink: '#FF2A85',
+              cyan: '#00F0FF',
+              gold: '#FFB800',
+              purple: '#7B2CBF',
+              asphalt: '#090A14',
+              deep: '#140826'
+            }
+          },
+          fontFamily: {
+            gta: ['"Anton"', '"Bebas Neue"', 'sans-serif'],
+            display: ['"Bebas Neue"', 'sans-serif'],
+            hud: ['"Chakra Petch"', 'sans-serif'],
+            script: ['"Yellowtail"', 'cursive'],
+            sans: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --vice-pink: #FF2A85;
+      --vice-cyan: #00F0FF;
+      --vice-gold: #FFB800;
+      --vice-purple: #7B2CBF;
+      --vice-asphalt: #090A14;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--vice-asphalt);
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ==================== ESTÉTICA GTA VI / GLASSMORPHISM ==================== */
+    .hud-glass {
+      background: linear-gradient(180deg, rgba(16, 9, 32, 0.90) 0%, rgba(9, 10, 20, 0.94) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-color: rgba(255, 42, 133, 0.30);
+    }
+
+    .hud-modal {
+      background: linear-gradient(155deg, rgba(24, 10, 46, 0.96) 0%, rgba(9, 10, 20, 0.98) 100%);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255, 42, 133, 0.42);
+      box-shadow: 0 0 42px rgba(255, 42, 133, 0.20), 0 24px 64px rgba(0, 0, 0, 0.85);
+    }
+
+    .gta-title-grad {
+      background: linear-gradient(180deg, #ffffff 0%, #ffe6f2 34%, #FFB800 72%, #FF2A85 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 0 rgba(12, 4, 24, 0.95)) drop-shadow(0 0 14px rgba(255, 42, 133, 0.55));
+    }
+
+    .vice-script {
+      color: #FF2A85;
+      text-shadow: 0 0 8px rgba(255, 42, 133, 0.95), 0 0 20px rgba(255, 184, 0, 0.5);
+    }
+
+    .neon-cyan-text { text-shadow: 0 0 10px rgba(0, 240, 255, 0.85); }
+    .neon-gold-text { text-shadow: 0 0 12px rgba(255, 184, 0, 0.9), 0 0 28px rgba(255, 42, 133, 0.55); }
+
+    /* ==================== ESTRELAS DE PROCURADO GTA ==================== */
+    .wanted-star {
+      color: rgba(255, 255, 255, 0.16);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+    }
+    .wanted-star.active {
+      color: #FFB800;
+      filter: drop-shadow(0 0 6px rgba(255, 184, 0, 0.95)) drop-shadow(0 0 12px rgba(255, 42, 133, 0.55));
+      transform: scale(1.1);
+    }
+    .wanted-star.max-wanted {
+      animation: wantedPolicePulse 0.7s ease-in-out infinite alternate;
+    }
+    @keyframes wantedPolicePulse {
+      0%   { color: #FF2A85; filter: drop-shadow(0 0 10px #FF2A85); transform: scale(1.16); }
+      50%  { color: #FFB800; filter: drop-shadow(0 0 14px #FFB800); transform: scale(1.24); }
+      100% { color: #00F0FF; filter: drop-shadow(0 0 10px #00F0FF); transform: scale(1.16); }
+    }
+
+    /* ==================== EQUALIZADOR RÁDIO VICE CITY ==================== */
+    @keyframes eqBounce {
+      0%, 100% { transform: scaleY(0.22); }
+      50%      { transform: scaleY(1); }
+    }
+    .eq-bar {
+      transform-origin: bottom;
+      transform: scaleY(0.25);
+      transition: transform 0.2s ease;
+    }
+    .eq-playing .eq-bar {
+      animation: eqBounce 0.55s ease-in-out infinite;
+    }
+
+    /* ==================== BOTÕES ARCADE NEON ==================== */
+    .btn-pink {
+      background: linear-gradient(135deg, #FF2A85 0%, #c41263 100%);
+      box-shadow: 0 3px 16px rgba(255, 42, 133, 0.42);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .btn-pink:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255, 42, 133, 0.72); }
+    .btn-pink:active { transform: scale(0.96); }
+
+    .btn-cyan {
+      background: linear-gradient(135deg, #00F0FF 0%, #00a8cc 100%);
+      color: #070812;
+      box-shadow: 0 3px 16px rgba(0, 240, 255, 0.40);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .btn-cyan:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0, 240, 255, 0.72); }
+    .btn-cyan:active { transform: scale(0.96); }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #FFB800 0%, #ff7b00 100%);
+      color: #090612;
+      box-shadow: 0 3px 16px rgba(255, 184, 0, 0.42);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255, 184, 0, 0.72); }
+    .btn-gold:active { transform: scale(0.96); }
+
+    /* ==================== CARROS TOP-DOWN DESCENDO A PISTA ==================== */
+    .race-viewport-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: #FF2A85 #090A14;
+    }
+
+    .car-unit {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: top 0.95s cubic-bezier(0.18, 0.92, 0.28, 1);
+      will-change: top;
+      cursor: pointer;
+      z-index: 20;
+    }
+    .car-unit:hover {
+      z-index: 45 !important;
+    }
+    .car-unit.boosting {
+      z-index: 40 !important;
+    }
+    .car-unit.winner {
+      z-index: 30;
+    }
+
+    /* Vibração realista de motor + micro-deslocamento de corrida */
+    @keyframes engineDrive {
+      0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+      25%      { transform: translate(-0.8px, 1.3px) rotate(0.45deg); }
+      50%      { transform: translate(0.9px, -0.8px) rotate(-0.4deg); }
+      75%      { transform: translate(-0.5px, 0.9px) rotate(0.25deg); }
+    }
+    .car-chassis-live {
+      animation: engineDrive 0.46s ease-in-out infinite;
+    }
+
+    @keyframes nitroRumble {
+      0%, 100% { transform: scale(1.12) translate(0, 0); }
+      25%      { transform: scale(1.18) translate(-1.6px, 2px); }
+      50%      { transform: scale(1.14) translate(1.6px, -1px); }
+      75%      { transform: scale(1.19) translate(-1px, 2px); }
+    }
+    .car-unit.boosting .car-chassis-live {
+      animation: nitroRumble 0.14s ease-in-out infinite;
+    }
+
+    /* Chamas de escapamento apontando PARA CIMA (traseira do carro) */
+    @keyframes idleFlameUp {
+      0%   { transform: scaleY(0.65) scaleX(0.9); opacity: 0.72; }
+      100% { transform: scaleY(1.12) scaleX(1.04); opacity: 0.98; }
+    }
+    @keyframes nitroFlameUp {
+      0%   { transform: scaleY(1.65) scaleX(1.22); opacity: 1; }
+      100% { transform: scaleY(2.65) scaleX(1.48); opacity: 1; }
+    }
+    .exhaust-up {
+      transform-origin: center bottom;
+      animation: idleFlameUp 0.12s infinite alternate;
+    }
+    .car-unit.boosting .exhaust-up {
+      animation: nitroFlameUp 0.07s infinite alternate;
+    }
+    .nitro-jet-up {
+      opacity: 0;
+      transform-origin: center bottom;
+      transition: opacity 0.2s ease;
+    }
+    .car-unit.boosting .nitro-jet-up {
+      opacity: 1;
+      animation: nitroFlameUp 0.08s infinite alternate;
+    }
+    .car-unit.winner .nitro-jet-up {
+      opacity: 0.55;
+      animation: idleFlameUp 0.11s infinite alternate;
+    }
+
+    /* Popup flutuante "+1 VENDA! ⚡" */
+    @keyframes popScoreFloat {
+      0%   { opacity: 0; transform: translate(-50%, 6px) scale(0.65); }
+      18%  { opacity: 1; transform: translate(-50%, -10px) scale(1.12); }
+      75%  { opacity: 1; transform: translate(-50%, -28px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -44px) scale(0.92); }
+    }
+    .score-pop-fx {
+      animation: popScoreFloat 1.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Etiqueta HUD ultra-legível do carro */
+    .car-tag {
+      background: rgba(9, 10, 22, 0.88);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.72);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .car-unit:hover .car-tag {
+      transform: scale(1.08);
+      border-color: #00F0FF;
+    }
+    .car-unit.winner .car-tag {
+      border-color: rgba(255, 184, 0, 0.85);
+      box-shadow: 0 0 14px rgba(255, 184, 0, 0.42), 0 4px 12px rgba(0, 0, 0, 0.8);
+    }
+
+    /* ==================== CELEBRAÇÃO CINEMATOGRÁFICA MISSION PASSED ==================== */
+    @keyframes missionBannerIn {
+      0%   { opacity: 0; transform: scale(0.75) translateY(-22px); }
+      12%  { opacity: 1; transform: scale(1.04) translateY(0); }
+      20%  { transform: scale(1) translateY(0); }
+      88%  { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(1.04) translateY(-14px); }
+    }
+    .mission-anim {
+      animation: missionBannerIn 5.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Barra shimmer */
+    @keyframes shimmerSlide {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .shimmer-bar {
+      background-size: 220% 100%;
+      animation: shimmerSlide 2.6s linear infinite;
+    }
+
+    /* Scrollbars elegantes */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #090A14; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #FF2A85, #7B2CBF); border-radius: 999px; }
+  
+    #raceWorld { min-width: 1640px; --lane: 74px; }
+    #raceWorld.overview { min-width: 0; }
+    #raceWorld.overview .car-tag { width: 100%; padding: 2px 0; border-radius: 4px; }
+    #raceWorld.overview .js-carname, #raceWorld.overview .js-name { display:none; }
+    #raceWorld.overview .js-rank-pill, #raceWorld.overview .js-sales-pill { font-size: 8px; padding:0; }
+    #raceWorld.overview .car-unit { width: 4.2%; }
+    #raceWorld.overview .js-svg-slot svg { width: 100%; height: auto; max-height: 74px; }
+    .car-unit { width: 4.35%; transform:translate(-50%,-50%); }
+    .car-unit > div { flex-direction: column-reverse; }
+    .car-unit .car-tag { width: 100%; margin: 0; }
+    .car-unit .js-svg-slot svg { transform: rotate(180deg); width: 44px; height: 88px; display:block; }
+    .car-unit .car-chassis-live { animation-play-state: paused; }
+    .car-unit.boosting .car-chassis-live { animation-play-state: running; }
+    .car-unit:not(.boosting) .exhaust-up { opacity:0; animation:none; }
+    .view-toggle { position:absolute; z-index:31; top:8px; left:8px; background:#101827ee; border:1px solid #8db8c9; color:white; padding:8px 12px; border-radius:8px; font:700 11px Inter,sans-serif; }
+    #raceScrollViewport { touch-action:pan-x; }
+    main { min-height:0; }
+    .hud-modal { max-height: 94dvh; overflow-y:auto; }
+    @media(max-width:640px) { header h1 { font-size: 15px !important; } header .btn-pink { padding:7px; } header .btn-pink span:last-child { display:none; } header > div:first-of-type { gap:4px; } #btnFloatRadioPrompt { max-width:90vw; font-size:10px; bottom:38px; } footer { font-size:9px; gap:4px; } }
+    @media(max-height:550px) { .car-unit .js-svg-slot svg { height:48px; width:26px; } .car-unit .js-carname {display:none;} .car-unit .car-tag {padding:1px 3px;} #btnFloatRadioPrompt {display:none;} }
+    @media(prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+
+#mobileRaceNav {display:none} .car-unit:focus-visible {outline:2px solid #00f0ff;outline-offset:3px;border-radius:8px}
+@media(max-width:900px){
+#appShell main {display:flex;flex-direction:column} #raceScrollViewport {flex:1;min-height:0;height:auto;overflow:hidden;touch-action:pan-y} #raceWorld {min-width:0!important}
+#mobileRaceNav {display:block;flex:none;background:#101421;border-top:1px solid #38404e;padding:8px 10px;z-index:31} .race-nav-row {display:flex;align-items:center;gap:6px} .race-nav-row button {flex:1;min-height:40px;border:1px solid #414a60;border-radius:8px;background:#202638;color:#e8edf6;font:700 12px Inter,sans-serif} .race-nav-row button[aria-pressed=true]{background:#f5c476;color:#16141a;border-color:#f5c476} #raceGroupLabel {font:600 11px Inter,sans-serif;color:#d0d9e6;margin-bottom:7px;display:flex;justify-content:space-between} #viewToggle,#viewToggle+div,#btnFloatRadioPrompt {display:none!important}
+#raceWorld.focus .car-unit {width:27%;} #raceWorld.focus .car-tag {width:100%;max-width:110px;padding:5px 4px;background:#101622f5;backdrop-filter:none;border-radius:8px} #raceWorld.focus .js-name {font-size:12px;line-height:1.3} #raceWorld.focus .js-carname {font-size:9px;display:block} #raceWorld.focus .js-sales-pill,#raceWorld.focus .js-rank-pill {font-size:11px} #raceWorld.focus .js-svg-slot svg {width:48px;height:90px;filter:drop-shadow(0 5px 4px #0009)}
+#raceWorld.overview .car-unit {width:5.8%} #raceWorld.overview .js-svg-slot svg {width:100%;height:auto} #raceWorld.overview .js-rank-pill {display:none} #raceWorld.overview .js-sales-pill {font-size:9px} #raceWorld.overview .car-tag {border:0;background:#111827;padding:2px 0} #raceWorld.overview .car-tag>div {justify-content:center} header h1 {font-size:clamp(13px,4vw,21px)!important} header button {min-height:36px} footer {padding-bottom:max(5px,env(safe-area-inset-bottom))} 
+}
+@media(max-width:900px) and (max-height:550px){#raceWorld.focus .js-svg-slot svg{width:27px;height:48px} #raceWorld.focus .car-tag{padding:2px} #raceWorld.focus .js-carname{display:none} #mobileRaceNav{padding:3px 8px} .race-nav-row button{min-height:32px} #raceGroupLabel{margin-bottom:3px}}
+</style>
+</head>
+<body class="select-none">
+
+  <!-- ==================== SHELL PRINCIPAL (100dvh, SEM SCROLL VERTICAL) ==================== -->
+  <div id="appShell" class="h-[100dvh] w-full flex flex-col overflow-hidden bg-vice-asphalt relative">
+
+    <!-- ==================== 1. HUD SUPERIOR COMPACTO GTA VI ==================== -->
+    <header class="hud-glass shrink-0 border-b z-30 px-2.5 sm:px-4 py-1.5 sm:py-2 relative">
+      <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-vice-pink via-vice-gold to-vice-cyan"></div>
+
+      <div class="flex items-center justify-between gap-2 sm:gap-3">
+        <!-- ESQUERDA: LOGO GTA VI + ASSINATURA ESTEVÃO -->
+        <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div class="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-vice-pink via-vice-gold to-vice-cyan p-[1.5px] shrink-0 shadow-lg shadow-vice-pink/35">
+            <div class="w-full h-full rounded-[10px] bg-[#0b0718] flex flex-col items-center justify-center leading-none">
+              <span class="font-gta text-lg sm:text-xl bg-gradient-to-b from-vice-gold via-orange-400 to-vice-pink bg-clip-text text-transparent">VI</span>
+              <span class="font-hud text-[7px] sm:text-[8px] font-bold tracking-widest text-vice-cyan">ALARES</span>
+            </div>
+          </div>
+
+          <div class="min-w-0">
+            <div class="flex items-baseline gap-1.5 leading-none">
+              <h1 class="font-gta text-xl sm:text-2xl lg:text-3xl tracking-wide gta-title-grad truncate">
+                CORRIDA ALARES
+              </h1>
+              <span class="hidden sm:inline font-script text-lg lg:text-2xl vice-script -rotate-3">Vice Edition</span>
+            </div>
+            <div class="flex items-center gap-1.5 mt-0.5 text-[10px] font-hud">
+              <span class="px-1.5 py-0.2 rounded bg-vice-pink/20 border border-vice-pink/40 text-pink-200 font-bold whitespace-nowrap">
+                ✦ Feito por Estevão
+              </span>
+              <span id="hudPrizeChip" class="hidden md:inline text-amber-300 font-semibold truncate">
+                🧀 Kit Gourmet de Queijo (6 vendas)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CENTRO: META COLETIVA 60 + 5 ESTRELAS DE PROCURADO GTA -->
+        <div class="hidden lg:flex items-center gap-3 px-3.5 py-1.5 rounded-xl bg-[#070713]/85 border border-vice-cyan/25 min-w-[330px] xl:min-w-[390px]">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between text-[11px] font-hud mb-1">
+              <span class="uppercase tracking-wider text-vice-cyan font-bold">META COLETIVA</span>
+              <span class="font-bold text-white">
+                <span id="hudTeamTotal" class="text-vice-gold text-sm">0</span>
+                <span class="text-slate-400">/ <span id="hudTeamGoal">60</span></span>
+                <span id="hudTeamPct" class="ml-1 text-vice-pink">(0%)</span>
+              </span>
+            </div>
+            <div class="relative w-full h-2.5 rounded-full bg-black/70 border border-white/15 overflow-hidden">
+              <div id="hudTeamBar" class="h-full rounded-full shimmer-bar transition-all duration-700"
+                style="width:0%; background-image:linear-gradient(90deg,#FF2A85,#FFB800,#00F0FF,#FF2A85);"></div>
+              <div class="pointer-events-none absolute inset-0 grid grid-cols-5">
+                <div class="border-r border-black/70"></div>
+                <div class="border-r border-black/70"></div>
+                <div class="border-r border-black/70"></div>
+                <div class="border-r border-black/70"></div>
+                <div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 Estrelas GTA -->
+          <div class="flex flex-col items-end shrink-0">
+            <div id="wantedStarsDesktop" class="flex items-center gap-0.5" title="1 estrela a cada 12 vendas (60 = 5 estrelas!)"></div>
+            <span id="wantedLabelDesktop" class="font-hud text-[9px] uppercase tracking-wider text-slate-400">0/5 Estrelas</span>
+          </div>
+        </div>
+
+        <!-- DIREITA: CONTROLES RÁDIO, RANKING, TELÃO E ADMIN -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <!-- Widget Compacto Rádio Synthwave -->
+          <div class="flex items-center gap-1 px-2 py-1 rounded-xl bg-[#080716]/90 border border-vice-pink/35">
+            <button id="btnRadioPlay" type="button" title="Tocar / Pausar Rádio Vice City"
+              class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-vice-pink/20 hover:bg-vice-pink/40 text-vice-pink flex items-center justify-center text-xs sm:text-sm cursor-pointer transition">
+              <span id="radioPlayIcon">▶</span>
+            </button>
+
+            <button id="btnRadioStation" type="button" title="Trocar Estação de Rádio"
+              class="hidden sm:flex flex-col items-start px-1.5 py-0.5 rounded-md hover:bg-white/5 cursor-pointer text-left max-w-[110px]">
+              <span class="font-hud text-[8px] uppercase tracking-widest text-vice-cyan leading-none">RÁDIO FM</span>
+              <span id="radioStationName" class="font-hud text-[11px] font-bold text-white truncate leading-tight">VICE WAVE FM</span>
+            </button>
+
+            <div id="radioEqWrap" class="hidden md:flex items-end gap-[2px] h-4 px-1" aria-hidden="true">
+              <span class="eq-bar w-[2.5px] h-full bg-vice-pink rounded-full" style="animation-delay:0s"></span>
+              <span class="eq-bar w-[2.5px] h-full bg-vice-gold rounded-full" style="animation-delay:0.14s"></span>
+              <span class="eq-bar w-[2.5px] h-full bg-vice-cyan rounded-full" style="animation-delay:0.28s"></span>
+              <span class="eq-bar w-[2.5px] h-full bg-vice-purple rounded-full" style="animation-delay:0.4s"></span>
+            </div>
+
+            <input id="radioVolumeSlider" type="range" min="0" max="100" value="42" title="Volume da Música"
+              class="hidden xl:block w-14 accent-[#FF2A85] cursor-pointer h-1" />
+
+            <button id="btnSfxToggle" type="button" title="Ligar/Desligar Efeitos Sonoros (Nitro, Ultrapassagem, Mission Passed)"
+              class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/15 text-xs flex items-center justify-center cursor-pointer transition">
+              <span id="sfxIcon">🔊</span>
+            </button>
+          </div>
+
+          <!-- Botão Ranking / Pódio -->
+          <button id="btnOpenRanking" type="button"
+            class="px-2.5 sm:px-3 py-2 rounded-xl bg-vice-gold/15 hover:bg-vice-gold/25 border border-vice-gold/45 text-vice-gold font-hud text-xs font-bold flex items-center gap-1 cursor-pointer transition">
+            <span>🏆</span>
+            <span class="hidden sm:inline">Ranking</span>
+          </button>
+
+          <!-- Botão Modo Telão -->
+          <button id="btnFullscreen" type="button" title="Modo Telão (Tela Cheia)"
+            class="hidden sm:flex px-2.5 py-2 rounded-xl bg-vice-cyan/10 hover:bg-vice-cyan/20 border border-vice-cyan/40 text-vice-cyan font-hud text-xs font-bold items-center gap-1 cursor-pointer transition">
+            <span>📺</span>
+            <span class="hidden xl:inline" id="fsBtnText">Telão</span>
+          </button>
+
+          <!-- Botão Painel Admin -->
+          <button id="btnOpenAdmin" type="button"
+            class="btn-pink px-2.5 sm:px-3.5 py-2 rounded-xl text-white font-hud text-xs font-extrabold flex items-center gap-1.5 cursor-pointer">
+            <span id="adminBtnLock">🔒</span>
+            <span>Admin</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra Compacta Mobile/Tablet (Meta 60 + 5 Estrelas) -->
+      <div class="flex lg:hidden items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-white/10">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
+          <span class="font-hud text-[10px] font-bold text-vice-cyan whitespace-nowrap">
+            META <strong id="hudTeamTotalMob" class="text-vice-gold">0</strong>/<span id="hudTeamGoalMob">60</span>
+          </span>
+          <div class="flex-1 h-2 rounded-full bg-black/70 border border-white/15 overflow-hidden">
+            <div id="hudTeamBarMob" class="h-full rounded-full shimmer-bar transition-all duration-700"
+              style="width:0%; background-image:linear-gradient(90deg,#FF2A85,#FFB800,#00F0FF);"></div>
+          </div>
+        </div>
+        <div id="wantedStarsMobile" class="flex items-center gap-0.5 shrink-0"></div>
+      </div>
+    </header>
+
+    <!-- ==================== 2. ARENA PRINCIPAL: CORRIDA TOP-DOWN DE CIMA PRA BAIXO ==================== -->
+    <main class="flex-1 relative overflow-hidden bg-vice-asphalt">
+      <!-- Container com scroll horizontal suave em telas pequenas (< 1024px) e 100% encaixado no desktop -->
+      <div id="raceScrollViewport" class="race-viewport-scroll w-full h-full relative">
+        <div id="raceWorld" class="relative h-full w-full">
+          <!-- LAYER 1: CANVAS 60FPS — VICE CITY (ESQ) + AVENIDA 15 FAIXAS (CENTRO) + PRAIA & OCEANO (DIR) -->
+          <canvas id="cityCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+          <!-- LAYER 2: 15 SUPERCARROS GTA 6 TOP-DOWN INTERATIVOS APONTANDO PARA BAIXO -->
+          <div id="carsLayer" class="absolute inset-0 z-20"></div>
+        </div>
+      </div>
+
+      <nav id="mobileRaceNav" aria-label="Câmeras da corrida"><div id="raceGroupLabel"><span>VICE CITY / CÂMERA 01</span><span>15 PILOTOS</span></div><div class="race-nav-row"><button data-camera="0">01–03</button><button data-camera="1">04–06</button><button data-camera="2">07–09</button><button data-camera="3">10–12</button><button data-camera="4">13–15</button><button data-camera="all">Todos</button></div></nav><button id="viewToggle" type="button" class="view-toggle">Visão geral</button>
+      <!-- Indicador discreto de deslize horizontal apenas em telas pequenas -->
+      <div class="lg:hidden pointer-events-none absolute top-2 right-2 z-30 px-2.5 py-1 rounded-full bg-black/70 border border-vice-cyan/35 font-hud text-[10px] text-vice-cyan backdrop-blur-sm">
+        ⇆ Deslize ou use Visão geral
+      </div>
+
+      <!-- Botão Flutuante Elegante para Ativar Rádio caso Autoplay esteja Pausado -->
+      <button id="btnFloatRadioPrompt" type="button"
+        class="fixed bottom-14 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full hud-modal border-vice-pink/70 text-white font-hud text-xs sm:text-sm font-bold flex items-center gap-2 shadow-2xl hover:scale-105 transition cursor-pointer">
+        <span class="w-2.5 h-2.5 rounded-full bg-vice-pink animate-ping"></span>
+        <span>🎵 LIGAR RÁDIO VICE CITY (SYNTHWAVE)</span>
+      </button>
+
+      <!-- Canvas de Confetes em Tela Cheia -->
+      <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+    </main>
+
+    <!-- ==================== 3. HUD INFERIOR DISCRETO: RÁDIO TICKER + MINI PÓDIO + ASSINATURA ==================== -->
+    <footer class="hud-glass shrink-0 border-t border-vice-cyan/25 z-30 px-3 sm:px-4 py-1.5 flex items-center justify-between gap-3 text-[11px] font-hud">
+      <!-- Ticker Ao Vivo -->
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <span class="px-2 py-0.5 rounded bg-vice-pink/25 border border-vice-pink/50 text-vice-pink font-extrabold tracking-wider shrink-0 text-[10px]">
+          📻 AO VIVO
+        </span>
+        <p id="bottomRadioTicker" class="text-slate-100 truncate">
+          🏁 Motores ligados na Avenida Leonida! Os 15 carros da Alares aceleram rumo ao Kit Gourmet de Queijo 🧀🍷
+        </p>
+      </div>
+
+      <!-- Mini Pódio Top 3 (clicável para abrir Ranking) -->
+      <button id="miniPodiumBtn" type="button" title="Ver Pódio e Ranking Completo"
+        class="hidden md:flex items-center gap-2 px-2.5 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 cursor-pointer shrink-0 transition">
+        <span id="miniTop1" class="text-vice-gold font-bold">🥇 —</span>
+        <span class="text-slate-600">|</span>
+        <span id="miniTop2" class="text-vice-cyan font-bold">🥈 —</span>
+        <span class="text-slate-600">|</span>
+        <span id="miniTop3" class="text-vice-pink font-bold">🥉 —</span>
+      </button>
+
+      <!-- Status Sync + Assinatura Oficial -->
+      <div class="flex items-center gap-2 shrink-0">
+        <span id="syncPill" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-[10px] font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Online
+        </span>
+        <span class="text-slate-300 font-bold whitespace-nowrap">
+          Feito por <strong class="text-vice-cyan">Estevão</strong> <span class="hidden sm:inline text-slate-500">• Corrida Alares</span>
+        </span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== DRAWER LATERAL: RANKING & PÓDIO TOP 3 ==================== -->
+  <div id="rankingDrawerBackdrop" class="hidden fixed inset-0 z-40 bg-black/70 backdrop-blur-sm flex justify-end">
+    <aside class="hud-modal w-full max-w-md h-full flex flex-col border-l border-vice-cyan/40 overflow-hidden">
+      <div class="p-4 border-b border-white/10 flex items-center justify-between">
+        <div>
+          <h2 class="font-gta text-2xl tracking-wide text-white flex items-center gap-2">
+            <span class="text-vice-gold">🏆</span> RANKING & PÓDIO LEONIDA
+          </h2>
+          <p class="font-hud text-[11px] text-vice-cyan">Classificação em tempo real • Alares Vice Edition</p>
+        </div>
+        <button id="btnCloseRanking" type="button" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold cursor-pointer">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- Pódio Top 3 -->
+        <div id="drawerPodiumGrid" class="grid grid-cols-3 gap-2"></div>
+
+        <!-- Tabela dos 15 Pilotos -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-hud text-xs uppercase tracking-widest text-slate-400 font-bold">Todos os 15 Competidores</span>
+            <span id="drawerWinnersCount" class="font-hud text-xs font-bold text-vice-gold">0 Kits Ganhos</span>
+          </div>
+          <div id="drawerRankingList" class="space-y-1.5"></div>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-white/10 text-center font-hud text-[11px] text-slate-400">
+        ✦ Feito por <strong class="text-vice-cyan">Estevão</strong> • Corrida Alares — GTA VI Vice Edition
+      </div>
+    </aside>
+  </div>
+
+  <!-- ==================== MODAL: CARD DETALHES DO PILOTO (AO CLICAR NO CARRO) ==================== -->
+  <div id="pilotDetailModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="hud-modal rounded-2xl w-full max-w-sm p-5 relative overflow-hidden">
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-vice-pink via-vice-gold to-vice-cyan"></div>
+      <button id="btnClosePilotDetail" type="button" class="absolute top-3 right-3 w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer">✕</button>
+      <div id="pilotDetailBody"></div>
+    </div>
+  </div>
+
+  <!-- LOGIN ADMIN -->
+  <div id="adminLoginModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="hud-modal rounded-2xl w-full max-w-md p-6 relative overflow-hidden">
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-vice-pink via-vice-gold to-vice-cyan"></div>
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-vice-pink/20 border border-vice-pink/55 flex items-center justify-center text-xl">🔐</div>
+          <div>
+            <h3 class="font-gta text-2xl tracking-wide text-white leading-none">LEONIDA COMMAND CENTER</h3>
+            <p class="font-hud text-[11px] uppercase tracking-widest text-vice-cyan mt-0.5">Acesso Exclusivo do Administrador</p>
+          </div>
+        </div>
+        <button id="btnCloseLogin" type="button" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 cursor-pointer">✕</button>
+      </div>
+
+      <form id="adminLoginForm" class="space-y-4">
+        <div>
+          <label for="adminPassInput" class="block font-hud text-xs font-bold text-slate-300 mb-1.5">Senha do Administrador</label>
+          <input id="adminPassInput" type="password" required autocomplete="current-password" placeholder="Digite a senha do admin..."
+            class="w-full px-4 py-3 rounded-xl bg-[#070812] border border-white/20 focus:border-vice-cyan focus:outline-none text-white font-hud tracking-widest text-sm" />
+          <p id="adminLoginErr" class="hidden text-xs text-rose-400 font-semibold mt-1.5">🚫 Senha incorreta! Acesso negado.</p>
+        </div>
+
+        <button type="submit" class="btn-pink w-full py-3 rounded-xl font-hud font-extrabold text-sm uppercase tracking-wider text-white cursor-pointer">
+          Desbloquear Painel Admin
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== OVERLAY COMPLETO: LEONIDA COMMAND CENTER (PAINEL ADMIN 4 ABAS) ==================== -->
+  <div id="adminOverlay" class="hidden fixed inset-0 z-40 bg-[#070712]/95 backdrop-blur-xl flex flex-col overflow-hidden">
+    <!-- Cabeçalho do Painel Admin -->
+    <div class="shrink-0 border-b border-vice-pink/35 bg-[#0e0820]/95 px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-vice-pink to-vice-purple flex items-center justify-center font-gta text-xl text-white shadow-lg shadow-vice-pink/35">VI</div>
+        <div>
+          <h2 class="font-gta text-2xl sm:text-3xl tracking-wide text-white leading-none">LEONIDA COMMAND CENTER</h2>
+          <p class="font-hud text-[11px] text-vice-cyan">Painel Exclusivo do Admin • Corrida Alares • Feito por Estevão</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btnAdminBackTrack" type="button" class="btn-cyan px-3.5 py-2 rounded-xl font-hud font-extrabold text-xs sm:text-sm cursor-pointer flex items-center gap-1.5">
+          <span>🏁</span> Ver Corrida Ao Vivo
+        </button>
+        <button id="btnAdminLock" type="button" class="px-3.5 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/45 text-rose-200 font-hud font-bold text-xs sm:text-sm cursor-pointer">
+          🔒 Bloquear
+        </button>
+      </div>
+    </div>
+
+    <!-- Navegação das 4 Abas -->
+    <div class="shrink-0 border-b border-white/10 bg-[#0a0818] px-3 sm:px-6 py-2 flex items-center gap-2 overflow-x-auto">
+      <button data-tab="live" class="admin-tab whitespace-nowrap px-3.5 py-2 rounded-xl font-hud text-xs sm:text-sm font-bold cursor-pointer bg-vice-pink text-white shadow-md shadow-vice-pink/35">
+        ⚡ 1. Controle Ao Vivo
+      </button>
+      <button data-tab="bulk" class="admin-tab whitespace-nowrap px-3.5 py-2 rounded-xl font-hud text-xs sm:text-sm font-bold cursor-pointer text-slate-300 hover:bg-white/10">
+        🚗 2. Editar 15 Pilotos & Carros (Lote)
+      </button>
+      <button data-tab="stats" class="admin-tab whitespace-nowrap px-3.5 py-2 rounded-xl font-hud text-xs sm:text-sm font-bold cursor-pointer text-slate-300 hover:bg-white/10">
+        📊 3. Dashboard & Estatísticas
+      </button>
+      <button data-tab="config" class="admin-tab whitespace-nowrap px-3.5 py-2 rounded-xl font-hud text-xs sm:text-sm font-bold cursor-pointer text-slate-300 hover:bg-white/10">
+        ⚙️ 4. Configurações, Demo & Histórico
+      </button>
+    </div>
+
+    <!-- Conteúdo Scrollável do Painel Admin -->
+    <div class="flex-1 overflow-y-auto p-3 sm:p-6">
+      <div class="max-w-7xl mx-auto">
+
+        <!-- ========== ABA 1: CONTROLE AO VIVO ========== -->
+        <section id="adminTabLive" class="space-y-4">
+          <div class="hud-modal rounded-2xl p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            <input id="adminSearch" type="text" placeholder="🔍 Buscar vendedor, nome do carro ou modelo GTA 6..."
+              class="w-full lg:w-80 px-3.5 py-2.5 rounded-xl bg-[#070814] border border-white/15 focus:border-vice-cyan focus:outline-none text-xs sm:text-sm text-white placeholder-slate-500" />
+            <div class="flex flex-wrap items-center gap-1.5" id="adminFilterBtns">
+              <button data-flt="all" class="flt-btn px-3 py-1.5 rounded-lg font-hud text-xs font-bold cursor-pointer bg-vice-cyan text-[#080812]">Todos (15)</button>
+              <button data-flt="almost" class="flt-btn px-3 py-1.5 rounded-lg font-hud text-xs font-bold cursor-pointer bg-white/5 text-slate-300 hover:bg-white/10">🔥 Quase lá (4–5)</button>
+              <button data-flt="winners" class="flt-btn px-3 py-1.5 rounded-lg font-hud text-xs font-bold cursor-pointer bg-white/5 text-slate-300 hover:bg-white/10">🧀 Ganharam Kit (6+)</button>
+              <button data-flt="zero" class="flt-btn px-3 py-1.5 rounded-lg font-hud text-xs font-bold cursor-pointer bg-white/5 text-slate-300 hover:bg-white/10">🚦 Zerados</button>
+            </div>
+          </div>
+
+          <div id="adminLiveGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5"></div>
+        </section>
+
+        <!-- ========== ABA 2: EDITAR 15 PILOTOS & CARROS EM LOTE ========== -->
+        <section id="adminTabBulk" class="hidden space-y-4">
+          <form id="bulkEditForm" class="hud-modal rounded-2xl p-4 sm:p-5 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+              <div>
+                <h3 class="font-gta text-2xl tracking-wide text-white">🚗 EDIÇÃO RÁPIDA EM LOTE (15 COLABORADORES)</h3>
+                <p class="text-xs text-slate-300">Digite todos os nomes dos vendedores da Alares e batize cada um dos 15 carros de uma só vez.</p>
+              </div>
+              <button type="submit" class="btn-cyan px-5 py-2.5 rounded-xl font-hud font-extrabold text-xs sm:text-sm cursor-pointer shrink-0">
+                💾 SALVAR TODOS OS 15
+              </button>
+            </div>
+
+            <div id="bulkRowsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-2.5"></div>
+
+            <div class="flex justify-end pt-2 border-t border-white/10">
+              <button type="submit" class="btn-pink px-6 py-3 rounded-xl font-hud font-extrabold text-sm text-white cursor-pointer">
+                💾 SALVAR ALTERAÇÕES DOS 15 PILOTOS & CARROS
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ========== ABA 3: DASHBOARD & ESTATÍSTICAS ========== -->
+        <section id="adminTabStats" class="hidden space-y-5">
+          <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="hud-modal rounded-2xl p-4 border-vice-cyan/35">
+              <div class="font-hud text-[11px] uppercase text-slate-400">Vendas da Equipe</div>
+              <div class="font-gta text-3xl text-vice-cyan mt-1"><span id="stTeamTotal">0</span><span class="font-hud text-sm text-slate-400"> / <span id="stTeamGoal">60</span></span></div>
+            </div>
+            <div class="hud-modal rounded-2xl p-4 border-vice-pink/35">
+              <div class="font-hud text-[11px] uppercase text-slate-400">% Meta Coletiva</div>
+              <div id="stTeamPct" class="font-gta text-3xl text-vice-pink mt-1">0%</div>
+            </div>
+            <div class="hud-modal rounded-2xl p-4 border-vice-gold/40">
+              <div class="font-hud text-[11px] uppercase text-slate-400">Kits Gourmet (6+)</div>
+              <div class="font-gta text-3xl text-vice-gold mt-1"><span id="stWinners">0</span><span class="font-hud text-sm text-slate-400"> / 15</span></div>
+            </div>
+            <div class="hud-modal rounded-2xl p-4 border-orange-400/35">
+              <div class="font-hud text-[11px] uppercase text-slate-400">Na Cola (4–5)</div>
+              <div id="stAlmost" class="font-gta text-3xl text-orange-400 mt-1">0</div>
+            </div>
+            <div class="col-span-2 lg:col-span-1 hud-modal rounded-2xl p-4 border-white/15">
+              <div class="font-hud text-[11px] uppercase text-slate-400">Líder Atual</div>
+              <div id="stLeader" class="font-gta text-xl text-white mt-1.5 truncate">—</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div class="lg:col-span-4 hud-modal rounded-2xl p-4 sm:p-5 space-y-3">
+              <h3 class="font-gta text-xl text-vice-gold">🔥 NA COLA DO KIT (4–5 VENDAS)</h3>
+              <div id="stAlmostList" class="space-y-2"></div>
+            </div>
+
+            <div class="lg:col-span-8 hud-modal rounded-2xl p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-gta text-xl text-white">📊 COMPARATIVO DOS 15 VENDEDORES</h3>
+                <span class="font-hud text-xs text-vice-gold">Meta Individual: <strong id="stIndGoalLbl">6</strong> vendas</span>
+              </div>
+              <div id="stBarChart" class="space-y-2"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== ABA 4: CONFIGURAÇÕES, DEMO & HISTÓRICO ========== -->
+        <section id="adminTabConfig" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Coluna Esquerda: Regras + Senha + Demo + Backup + Reset -->
+          <div class="lg:col-span-6 space-y-4">
+            <div class="hud-modal rounded-2xl p-5 space-y-3.5">
+              <h3 class="font-gta text-2xl text-vice-cyan">⚙️ REGRAS DA CORRIDA</h3>
+              <form id="cfgCampaignForm" class="space-y-3">
+                <div>
+                  <label class="block font-hud text-xs font-bold text-slate-300 mb-1">Prêmio na Linha de Chegada</label>
+                  <input id="inpPrizeName" type="text" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#070814] border border-white/15 focus:border-vice-cyan focus:outline-none text-sm text-white" />
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block font-hud text-xs font-bold text-slate-300 mb-1">Meta Individual (Chegada)</label>
+                    <input id="inpIndGoal" type="number" min="1" max="50" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#070814] border border-white/15 focus:border-vice-cyan focus:outline-none text-sm text-white font-hud font-bold" />
+                  </div>
+                  <div>
+                    <label class="block font-hud text-xs font-bold text-slate-300 mb-1">Meta Coletiva (Equipe)</label>
+                    <input id="inpTeamGoal" type="number" min="1" max="500" required class="w-full px-3.5 py-2.5 rounded-xl bg-[#070814] border border-white/15 focus:border-vice-cyan focus:outline-none text-sm text-white font-hud font-bold" />
+                  </div>
+                </div>
+                <button type="submit" class="btn-cyan w-full py-2.5 rounded-xl font-hud font-extrabold text-sm cursor-pointer">💾 Salvar Metas e Prêmio</button>
+              </form>
+
+              <div class="pt-3 border-t border-white/10">
+                <h4 class="font-gta text-lg text-vice-pink mb-2">🔐 ALTERAR SENHA DO ADMIN</h4>
+                <form id="cfgPassForm" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input id="inpNewPass" type="password" minlength="4" required placeholder="Nova senha" class="px-3 py-2 rounded-xl bg-[#070814] border border-white/15 focus:border-vice-pink focus:outline-none text-xs text-white" />
+                  <input id="inpConfPass" type="password" minlength="4" required placeholder="Confirmar" class="px-3 py-2 rounded-xl bg-[#070814] border border-white/15 focus:border-vice-pink focus:outline-none text-xs text-white" />
+                  <button type="submit" class="btn-pink py-2 rounded-xl font-hud font-bold text-xs text-white cursor-pointer">🔑 Atualizar</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Modo Demo & Backup -->
+            <div class="hud-modal rounded-2xl p-5 space-y-3">
+              <h3 class="font-gta text-2xl text-vice-gold">🚀 MODO DEMO & BACKUP</h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button id="btnSimSingle" type="button" class="btn-gold py-2.5 px-3 rounded-xl font-hud font-extrabold text-xs cursor-pointer">
+                  ⚡ Simular +1 Venda Aleatória
+                </button>
+                <button id="btnToggleAutoDemo" type="button" class="py-2.5 px-3 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/50 text-purple-100 font-hud font-extrabold text-xs cursor-pointer transition">
+                  🎬 Auto-Demo: OFF
+                </button>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/10">
+                <button id="btnExpCSV" type="button" class="py-2 px-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-200 font-hud text-xs font-bold cursor-pointer">📊 CSV</button>
+                <button id="btnExpJSON" type="button" class="py-2 px-2 rounded-xl bg-vice-cyan/15 hover:bg-vice-cyan/25 border border-vice-cyan/40 text-vice-cyan font-hud text-xs font-bold cursor-pointer">💾 JSON</button>
+                <label class="py-2 px-2 rounded-xl bg-vice-pink/15 hover:bg-vice-pink/25 border border-vice-pink/40 text-pink-200 font-hud text-xs font-bold cursor-pointer text-center">
+                  📥 Importar
+                  <input id="inpImpJSON" type="file" accept="application/json" class="hidden" />
+                </label>
+              </div>
+            </div>
+
+            <!-- Reset Dupla Confirmação -->
+            <div class="hud-modal rounded-2xl p-5 border-rose-500/45 bg-rose-950/20 space-y-2.5">
+              <h3 class="font-gta text-xl text-rose-400">⚠️ ZERAR CORRIDA (NOVO PERÍODO)</h3>
+              <p class="text-xs text-slate-300">Zera as vendas e o histórico mantendo os nomes dos 15 vendedores e dos 15 carros.</p>
+              <button id="btnOpenResetModal" type="button" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-hud font-extrabold text-xs cursor-pointer">
+                🔄 Zerar Todas as Vendas
+              </button>
+            </div>
+          </div>
+
+          <!-- Coluna Direita: Histórico de Vendas com Desfazer -->
+          <div class="lg:col-span-6 hud-modal rounded-2xl p-5 flex flex-col max-h-[700px]">
+            <div class="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+              <div>
+                <h3 class="font-gta text-2xl text-white">📜 HISTÓRICO DE VENDAS</h3>
+                <p class="font-hud text-[11px] text-slate-400">Clique em Desfazer para reverter qualquer lançamento</p>
+              </div>
+              <span id="histCountPill" class="px-2.5 py-1 rounded-full bg-white/10 font-hud text-xs font-bold text-slate-200">0</span>
+            </div>
+            <div id="adminHistoryList" class="flex-1 overflow-y-auto space-y-2 pr-1"></div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CONFIRMAÇÃO DUPLA DE RESET ==================== -->
+  <div id="resetModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="hud-modal rounded-2xl w-full max-w-md p-6 border-rose-500/60 space-y-4">
+      <h3 class="font-gta text-2xl text-rose-400">⚠️ CONFIRMAÇÃO DUPLA — ZERAR CORRIDA</h3>
+      <div id="resetStep1" class="space-y-4">
+        <p class="text-sm text-slate-200">Todas as vendas dos 15 colaboradores serão zeradas e o histórico será limpo. Os nomes dos pilotos e carros serão mantidos. Continuar?</p>
+        <div class="flex justify-end gap-2">
+          <button id="btnResetCancel1" type="button" class="px-4 py-2 rounded-xl bg-white/10 font-hud text-xs font-bold text-slate-200 cursor-pointer">Cancelar</button>
+          <button id="btnResetNext" type="button" class="px-4 py-2 rounded-xl bg-vice-gold text-[#080612] font-hud text-xs font-extrabold cursor-pointer">Avançar (2/2) →</button>
+        </div>
+      </div>
+      <div id="resetStep2" class="hidden space-y-4">
+        <p class="text-sm text-rose-200">Digite <strong class="px-2 py-0.5 rounded bg-rose-500/30 text-white font-hud">ZERAR</strong> abaixo para confirmar:</p>
+        <input id="inpResetWord" type="text" placeholder="ZERAR" class="w-full px-4 py-2.5 rounded-xl bg-[#070814] border border-rose-400/50 focus:outline-none text-white font-hud uppercase tracking-widest text-sm" />
+        <div class="flex justify-end gap-2">
+          <button id="btnResetCancel2" type="button" class="px-4 py-2 rounded-xl bg-white/10 font-hud text-xs font-bold text-slate-200 cursor-pointer">Cancelar</button>
+          <button id="btnResetConfirm" type="button" disabled class="px-4 py-2 rounded-xl bg-rose-600 disabled:opacity-35 disabled:pointer-events-none font-hud text-xs font-extrabold text-white cursor-pointer">🔥 ZERAR AGORA</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CELEBRAÇÃO CINEMATOGRÁFICA: MISSION PASSED! ==================== -->
+  <div id="missionBannerWrap" class="hidden fixed inset-0 z-50 pointer-events-none flex items-center justify-center p-4">
+    <div id="missionBannerCard" class="pointer-events-auto hud-modal rounded-3xl px-7 sm:px-14 py-6 sm:py-8 border-2 border-vice-gold text-center max-w-2xl relative shadow-2xl cursor-pointer" title="Clique para fechar">
+      <div id="mbTitle" class="font-gta text-5xl sm:text-7xl tracking-wider text-vice-gold neon-gold-text leading-none">
+        MISSION PASSED!
+      </div>
+      <div id="mbSubtitle" class="font-hud text-xs sm:text-base uppercase tracking-[0.26em] text-vice-cyan font-bold mt-2">
+        RESPECT + • KIT GOURMET DE QUEIJO CONQUISTADO 🧀🍷
+      </div>
+      <div id="mbWho" class="font-gta text-2xl sm:text-4xl text-white mt-3 tracking-wide">
+        PILOTO 01
+      </div>
+      <div id="mbDetail" class="font-hud text-xs sm:text-sm text-pink-200 font-semibold mt-1">
+        🏁 Cruzou a linha de chegada com 6 vendas!
+      </div>
+      <div class="font-hud text-[10px] text-slate-400 mt-3 uppercase tracking-widest">Clique para dispensar</div>
+    </div>
+  </div>
+
+  <!-- ==================== TOASTS ==================== -->
+  <div id="toastStack" class="fixed bottom-12 right-4 z-50 flex flex-col gap-2 max-w-xs w-[calc(100%-2rem)] pointer-events-none"></div>
+
+  <!-- ==================== SCRIPT PRINCIPAL (MÓDULO ES + FIREBASE + CANVAS + RÁDIO SYNTHWAVE) ==================== -->
+  <script src="/firebase-config.js"></script>
+  <script type="module">
+    let initializeApp, getAuth, signInAnonymously, signInWithCustomToken, getFirestore, doc, setDoc, onSnapshot;
+
+    // =========================================================================
+    // 1. CONSTANTES DE GEOMETRIA COMPARTILHADA (CANVAS 60FPS <-> CARROS DOM)
+    // =========================================================================
+    let cameraGroup=0;
+    const isMobileRace=()=>innerWidth<=900;
+    const focusedRace=()=>isMobileRace() && cameraGroup!=="all";
+    const laneCount=()=>focusedRace()?3:15;
+    const laneOffset=()=>focusedRace()?cameraGroup*3:0;
+    const LAYOUT = {
+      CITY_LEFT: 0.16,     // 16% esquerda: Vice City Art Déco
+      ROAD_WIDTH: 0.68,    // 68% centro: Super Avenida 15 Faixas
+      BEACH_RIGHT: 0.16,   // 16% direita: Vice Beach & Oceano
+      START_Y: 0.82,      // Topo: Linha de Largada (0 vendas)
+      FINISH_Y: 0.18      // Base: Linha de Chegada Quadriculada (6 vendas)
+    };
+
+    // Catálogo dos 15 Supercarros GTA 6
+    const GTA6_MODELS = [
+      { id: 'cheetah-classic',   name: 'Cheetah Classic',   style: 'wedge80s',   body: '#FF2A85', neon: '#00F0FF' },
+      { id: 'banshee-gts',       name: 'Banshee GTS',       style: 'coupeGT',    body: '#00B4D8', neon: '#FF2A85' },
+      { id: 'infernus',          name: 'Infernus',          style: 'superWing',  body: '#FF7B00', neon: '#FFB800' },
+      { id: 'turismo-omaggio',   name: 'Turismo Omaggio',   style: 'hyperMid',   body: '#EF233C', neon: '#00F0FF' },
+      { id: 'coquette-d10',      name: 'Coquette D10',      style: 'hyperMid',   body: '#9D4EDD', neon: '#FFB800' },
+      { id: 'elegy-rh8',         name: 'Elegy RH8',         style: 'jdmTuner',   body: '#00F0FF', neon: '#FF2A85' },
+      { id: 'zentorno',          name: 'Zentorno',          style: 'stealthHex', body: '#1E293B', neon: '#FF2A85' },
+      { id: 'gauntlet-hellfire', name: 'Gauntlet Hellfire', style: 'muscleWide', body: '#FACC15', neon: '#FF7B00' },
+      { id: 'dominator-gt',      name: 'Dominator GT',      style: 'muscleWide', body: '#2563EB', neon: '#00F0FF' },
+      { id: 'comet-s2',          name: 'Comet S2',          style: 'porscheGT',  body: '#EC4899', neon: '#38BDF8' },
+      { id: 'buffalo-evx',       name: 'Buffalo EVX',       style: 'evMuscle',   body: '#10B981', neon: '#00F0FF' },
+      { id: 'adder',             name: 'Adder',             style: 'bugatti',    body: '#F97316', neon: '#A855F7' },
+      { id: 'jester-rr',         name: 'Jester RR',         style: 'jdmTuner',   body: '#FB7185', neon: '#FFB800' },
+      { id: 'osiris',            name: 'Osiris',            style: 'hyperMid',   body: '#7C3AED', neon: '#00F0FF' },
+      { id: 'turismo-r',         name: 'Turismo R',         style: 'superWing',  body: '#06B6D4', neon: '#FFB800' }
+    ];
+
+    const NEON_SWATCHES = ['#00F0FF', '#FF2A85', '#FFB800', '#FF7B00', '#A855F7', '#38BDF8', '#34D399'];
+
+    function createInitialState() {
+      return {
+        config: {
+          prizeName: 'Kit Gourmet de Queijo 🧀🍷',
+          individualGoal: 6,
+          teamGoal: 60,
+
+        },
+        sellers: GTA6_MODELS.map((m, idx) => {
+          const n = String(idx + 1).padStart(2, '0');
+          return {
+            id: `p_${n}`,
+            lane: idx + 1,
+            name: `Piloto ${n}`,
+            carName: m.name,
+            carModel: m.id,
+            bodyColor: m.body,
+            neonColor: m.neon,
+            sales: 0,
+            lastSaleAt: 0
+          };
+        }),
+        history: [],
+        updatedAt: Date.now()
+      };
+    }
+
+    function validState(d) { return !!(d && d.config && typeof d.config.prizeName==='string' && Number.isInteger(d.config.individualGoal) && d.config.individualGoal>=1 && d.config.individualGoal<=50 && Number.isInteger(d.config.teamGoal) && d.config.teamGoal>=1 && d.config.teamGoal<=500 && Array.isArray(d.history) && Array.isArray(d.sellers) && d.sellers.length===15 && new Set(d.sellers.map(x=>x.id)).size===15 && new Set(d.sellers.map(x=>x.lane)).size===15 && d.sellers.every(x=>x && typeof x.id==='string' && Number.isInteger(x.lane) && x.lane>=1 && x.lane<=15 && Number.isSafeInteger(x.sales) && x.sales>=0 && ['name','carName','carModel'].every(k=>typeof x[k]==='string') && ['bodyColor','neonColor'].every(k=>/^#[0-9a-f]{6}$/i.test(x[k])))); }
+    let state = createInitialState();
+    try { const saved=JSON.parse(localStorage.getItem('alares-vice-local-v3')); if(validState(saved)) { delete saved.config.adminPassword; state=saved; } } catch(e) {}
+    let isAdminAuth = false;
+    let currentAdminTab = 'live';
+    let currentFilter = 'all';
+    let sfxEnabled = true;
+    let autoDemoTimer = null;
+
+    // Controle de efeitos ao vivo
+    const boostingIds = new Set();
+    let prevSalesMap = new Map();
+    let prevRankMap = new Map();
+    let prevStarsLit = 0;
+    let prevTeamGoalDone = false;
+    let initialSynced = false;
+
+    // Firebase Runtime
+    let db = null;
+    let auth = null;
+    let fbUser = null;
+    let campaignDocRef = null;
+    let fbReady = false;
+
+    // =========================================================================
+    // 2. MOTOR MUSICAL PROCEDURAL SYNTHWAVE / OUTRUN (WEB AUDIO API — 3 ESTAÇÕES)
+    // =========================================================================
+    const RADIO_STATIONS = [
+      {
+        name: 'VICE WAVE FM',
+        bpm: 108,
+        // Am - F - C - G
+        chords: [
+          [220.00, 261.63, 329.63],
+          [174.61, 220.00, 261.63],
+          [130.81, 196.00, 261.63],
+          [196.00, 246.94, 293.66]
+        ],
+        bass: [55.00, 43.65, 65.41, 49.00],
+        arp: [440, 523.25, 659.25, 523.25, 349.23, 440, 523.25, 440, 523.25, 659.25, 783.99, 659.25, 392, 493.88, 587.33, 493.88]
+      },
+      {
+        name: 'OCEAN DRIVE',
+        bpm: 96,
+        // Dm - Bb - F - C
+        chords: [
+          [146.83, 220.00, 261.63],
+          [116.54, 174.61, 233.08],
+          [174.61, 220.00, 261.63],
+          [130.81, 196.00, 246.94]
+        ],
+        bass: [73.42, 58.27, 43.65, 65.41],
+        arp: [293.66, 349.23, 440, 523.25, 233.08, 293.66, 349.23, 466.16, 349.23, 440, 523.25, 698.46, 261.63, 329.63, 392, 523.25]
+      },
+      {
+        name: 'LEONIDA TURBO',
+        bpm: 122,
+        // Em - C - D - Bm
+        chords: [
+          [164.81, 246.94, 329.63],
+          [130.81, 196.00, 261.63],
+          [146.83, 220.00, 293.66],
+          [123.47, 185.00, 246.94]
+        ],
+        bass: [82.41, 65.41, 73.42, 61.74],
+        arp: [329.63, 493.88, 659.25, 493.88, 523.25, 659.25, 783.99, 659.25, 587.33, 739.99, 880, 739.99, 493.88, 587.33, 739.99, 587.33]
+      }
+    ];
+
+    class ViceRadioEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.musicGain = null;
+        this.sfxGain = null;
+        this.isPlaying = false;
+        this.stationIdx = 0;
+        this.volume = 0.42;
+        this.step = 0;
+        this.timer = null;
+        this.noiseBuf = null;
+      }
+
+      ensureContext() {
+        if (!this.ctx) {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return null;
+          this.ctx = new Ctx();
+
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.value = 0.9;
+          this.masterGain.connect(this.ctx.destination);
+
+          this.musicGain = this.ctx.createGain();
+          this.musicGain.gain.value = this.volume * 0.55;
+          this.musicGain.connect(this.masterGain);
+
+          this.sfxGain = this.ctx.createGain();
+          this.sfxGain.gain.value = 0.65;
+          this.sfxGain.connect(this.masterGain);
+
+          // Buffer de ruído branco para caixa/hi-hat 80s
+          const len = this.ctx.sampleRate * 0.25;
+          this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+          const data = this.noiseBuf.getChannelData(0);
+          for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        return this.ctx;
+      }
+
+      setVolume(v01) {
+        this.volume = Math.max(0, Math.min(1, v01));
+        if (this.musicGain && this.ctx) {
+          this.musicGain.gain.setTargetAtTime(this.volume * 0.55, this.ctx.currentTime, 0.05);
+        }
+      }
+
+      toggle() {
+        if (this.isPlaying) {
+          this.stop();
+        } else {
+          this.start();
+        }
+        return this.isPlaying;
+      }
+
+      start() {
+        const ctx = this.ensureContext();
+        if (!ctx) return;
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.scheduleLoop();
+        updateRadioUI();
+      }
+
+      stop() {
+        this.isPlaying = false;
+        if (this.timer) {
+          clearInterval(this.timer);
+          this.timer = null;
+        }
+        updateRadioUI();
+      }
+
+      nextStation() {
+        this.stationIdx = (this.stationIdx + 1) % RADIO_STATIONS.length;
+        this.step = 0;
+        if (this.isPlaying) {
+          clearInterval(this.timer);
+          this.scheduleLoop();
+        }
+        updateRadioUI();
+        showToast('📻 Rádio Vice City', `Sintonizado em ${RADIO_STATIONS[this.stationIdx].name}`, 'pink');
+      }
+
+      scheduleLoop() {
+        const st = RADIO_STATIONS[this.stationIdx];
+        const stepMs = (60 / st.bpm / 4) * 1000; // colcheia/semicolcheia (16th)
+        this.tickStep();
+        this.timer = setInterval(() => {
+          if (this.isPlaying) this.tickStep();
+        }, stepMs);
+      }
+
+      tickStep() {
+        const ctx = this.ctx;
+        if (!ctx || !this.musicGain) return;
+        const now = ctx.currentTime + 0.02;
+        const st = RADIO_STATIONS[this.stationIdx];
+        const bar = Math.floor(this.step / 16) % 4;
+        const beatStep = this.step % 16;
+
+        // 1. Kick 80s (passos 0, 4, 8, 12)
+        if (beatStep % 4 === 0) {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(145, now);
+          osc.frequency.exponentialRampToValueAtTime(42, now + 0.13);
+          g.gain.setValueAtTime(0.45, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(g);
+          g.connect(this.musicGain);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        }
+
+        // 2. Snare gated 80s (passos 4, 12)
+        if (beatStep === 4 || beatStep === 12) {
+          const src = ctx.createBufferSource();
+          src.buffer = this.noiseBuf;
+          const flt = ctx.createBiquadFilter();
+          flt.type = 'bandpass';
+          flt.frequency.value = 1800;
+          const g = ctx.createGain();
+          g.gain.setValueAtTime(0.24, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+          src.connect(flt);
+          flt.connect(g);
+          g.connect(this.musicGain);
+          src.start(now);
+          src.stop(now + 0.2);
+        }
+
+        // 3. Hi-hat fechado (passos ímpares ou colcheias)
+        if (beatStep % 2 === 1) {
+          const src = ctx.createBufferSource();
+          src.buffer = this.noiseBuf;
+          const flt = ctx.createBiquadFilter();
+          flt.type = 'highpass';
+          flt.frequency.value = 6500;
+          const g = ctx.createGain();
+          g.gain.setValueAtTime(0.06, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          src.connect(flt);
+          flt.connect(g);
+          g.connect(this.musicGain);
+          src.start(now);
+          src.stop(now + 0.06);
+        }
+
+        // 4. Baixo Synthwave Pulsante em colcheias (passos pares)
+        if (beatStep % 2 === 0) {
+          const root = st.bass[bar];
+          const freq = (this.stationIdx === 2 && beatStep % 4 === 2) ? root * 2 : root;
+          const osc = ctx.createOscillator();
+          const flt = ctx.createBiquadFilter();
+          const g = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now);
+          flt.type = 'lowpass';
+          flt.frequency.setValueAtTime(720, now);
+          flt.frequency.exponentialRampToValueAtTime(210, now + 0.16);
+          g.gain.setValueAtTime(0.22, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+          osc.connect(flt);
+          flt.connect(g);
+          g.connect(this.musicGain);
+          osc.start(now);
+          osc.stop(now + 0.21);
+        }
+
+        // 5. Pad Analógico no início de cada compasso
+        if (beatStep === 0) {
+          const chord = st.chords[bar];
+          const dur = (60 / st.bpm) * 3.9;
+          chord.forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const flt = ctx.createBiquadFilter();
+            const g = ctx.createGain();
+            osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+            osc.frequency.setValueAtTime(f, now);
+            osc.detune.value = idx === 1 ? 6 : -5;
+            flt.type = 'lowpass';
+            flt.frequency.value = 1150;
+            g.gain.setValueAtTime(0.001, now);
+            g.gain.linearRampToValueAtTime(0.055, now + 0.28);
+            g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+            osc.connect(flt);
+            flt.connect(g);
+            g.connect(this.musicGain);
+            osc.start(now);
+            osc.stop(now + dur + 0.05);
+          });
+        }
+
+        // 6. Arpejo Neon Melódico
+        if (beatStep % 2 === 0) {
+          const arpNote = st.arp[(bar * 4 + (beatStep / 2)) % st.arp.length];
+          const osc = ctx.createOscillator();
+          const flt = ctx.createBiquadFilter();
+          const g = ctx.createGain();
+          osc.type = this.stationIdx === 1 ? 'triangle' : 'square';
+          osc.frequency.setValueAtTime(arpNote, now);
+          flt.type = 'lowpass';
+          flt.frequency.setValueAtTime(2400, now);
+          flt.frequency.exponentialRampToValueAtTime(700, now + 0.17);
+          g.gain.setValueAtTime(0.055, now);
+          g.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+          osc.connect(flt);
+          flt.connect(g);
+          g.connect(this.musicGain);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        }
+
+        this.step = (this.step + 1) % 64;
+      }
+
+      // Efeitos Sonoros GTA
+      playSFX(type) {
+        if (!sfxEnabled) return;
+        const ctx = this.ensureContext();
+        if (!ctx || !this.sfxGain) return;
+        const now = ctx.currentTime;
+
+        try {
+          if (type === 'nitro' || type === 'overtake') {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(105, now);
+            osc.frequency.exponentialRampToValueAtTime(type === 'overtake' ? 580 : 410, now + 0.22);
+            osc.frequency.exponentialRampToValueAtTime(160, now + 0.42);
+            g.gain.setValueAtTime(0.001, now);
+            g.gain.linearRampToValueAtTime(0.16, now + 0.04);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+            osc.connect(g);
+            g.connect(this.sfxGain);
+            osc.start(now);
+            osc.stop(now + 0.46);
+
+            if (type === 'overtake') {
+              const ch = ctx.createOscillator();
+              const cg = ctx.createGain();
+              ch.type = 'triangle';
+              ch.frequency.setValueAtTime(659.25, now + 0.08);
+              ch.frequency.setValueAtTime(987.77, now + 0.17);
+              cg.gain.setValueAtTime(0.14, now + 0.08);
+              cg.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+              ch.connect(cg);
+              cg.connect(this.sfxGain);
+              ch.start(now + 0.08);
+              ch.stop(now + 0.42);
+            }
+          } else if (type === 'wanted_star') {
+            [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+              const o = ctx.createOscillator();
+              const g = ctx.createGain();
+              o.type = 'triangle';
+              o.frequency.setValueAtTime(f, now + i * 0.07);
+              g.gain.setValueAtTime(0.13, now + i * 0.07);
+              g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.26);
+              o.connect(g);
+              g.connect(this.sfxGain);
+              o.start(now + i * 0.07);
+              o.stop(now + i * 0.07 + 0.28);
+            });
+          } else if (type === 'mission_passed') {
+            const notes = [
+              { f: 261.63, t: 0.00, d: 0.26 },
+              { f: 329.63, t: 0.00, d: 0.26 },
+              { f: 392.00, t: 0.15, d: 0.26 },
+              { f: 523.25, t: 0.30, d: 0.72 },
+              { f: 659.25, t: 0.30, d: 0.72 },
+              { f: 783.99, t: 0.44, d: 0.80 }
+            ];
+            notes.forEach(n => {
+              const o = ctx.createOscillator();
+              const g = ctx.createGain();
+              o.type = 'triangle';
+              o.frequency.setValueAtTime(n.f, now + n.t);
+              g.gain.setValueAtTime(0.001, now + n.t);
+              g.gain.linearRampToValueAtTime(0.18, now + n.t + 0.03);
+              g.gain.exponentialRampToValueAtTime(0.001, now + n.t + n.d);
+              o.connect(g);
+              g.connect(this.sfxGain);
+              o.start(now + n.t);
+              o.stop(now + n.t + n.d + 0.04);
+            });
+          } else if (type === 'minus') {
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = 'sine';
+            o.frequency.setValueAtTime(260, now);
+            o.frequency.exponentialRampToValueAtTime(125, now + 0.16);
+            g.gain.setValueAtTime(0.12, now);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+            o.connect(g);
+            g.connect(this.sfxGain);
+            o.start(now);
+            o.stop(now + 0.2);
+          }
+        } catch (_) {}
+      }
+    }
+
+    const radio = new ViceRadioEngine();
+
+    function updateRadioUI() {
+      const st = RADIO_STATIONS[radio.stationIdx];
+      document.getElementById('radioPlayIcon').textContent = radio.isPlaying ? '⏸' : '▶';
+      document.getElementById('radioStationName').textContent = st.name;
+      document.getElementById('radioEqWrap').classList.toggle('eq-playing', radio.isPlaying);
+      document.getElementById('btnFloatRadioPrompt').classList.toggle('hidden', radio.isPlaying);
+    }
+
+    // =========================================================================
+    // 3. GERADOR DE 15 SUPERCARROS GTA 6 TOP-DOWN (APONTANDO PARA BAIXO!)
+    // =========================================================================
+    let svgCounter = 0;
+
+    function buildDownwardCarSVG(modelId, bodyColor, neonColor, sizeClass = 'w-[34px] h-[74px] sm:w-[38px] sm:h-[82px]') {
+      const m = GTA6_MODELS.find(c => c.id === modelId) || GTA6_MODELS[0];
+      const id = `car_${++svgCounter}`;
+
+      let bodyPath = '';
+      let windshield = '';
+      let rearWindow = '';
+      let roof = '';
+      let spoiler = '';
+      let hoodDetails = '';
+      let stripes = '';
+
+      switch (m.style) {
+        case 'wedge80s': // Cheetah Classic
+          bodyPath = 'M 10,16 L 58,16 C 61,16 62,24 62,38 L 62,102 C 62,118 55,126 34,127 C 13,126 6,118 6,102 L 6,38 C 6,24 7,16 10,16 Z';
+          rearWindow = 'M 17,32 L 51,32 L 48,48 L 20,48 Z';
+          roof = 'M 19,48 L 49,48 L 48,70 L 20,70 Z';
+          windshield = 'M 18,70 L 50,70 L 53,88 C 44,92 24,92 15,88 Z';
+          spoiler = `<rect x="8" y="13" width="52" height="6.5" rx="2" fill="#0b0918" stroke="${neonColor}" stroke-width="1.2"/>`;
+          hoodDetails = `<path d="M 12,35 L 12,50 M 15,35 L 15,50 M 53,35 L 53,50 M 56,35 L 56,50" stroke="rgba(0,0,0,0.65)" stroke-width="1.5"/>`;
+          stripes = `<path d="M 22,95 L 22,120 M 46,95 L 46,120" stroke="rgba(255,255,255,0.28)" stroke-width="1.4"/>`;
+          break;
+
+        case 'stealthHex': // Zentorno
+          bodyPath = 'M 13,14 L 55,14 L 62,38 L 60,104 L 49,126 L 34,129 L 19,126 L 8,104 L 6,38 Z';
+          rearWindow = 'M 21,28 L 47,28 L 44,48 L 24,48 Z';
+          roof = 'M 22,48 L 46,48 L 44,72 L 24,72 Z';
+          windshield = 'M 21,72 L 47,72 L 52,93 L 34,99 L 16,93 Z';
+          spoiler = `<path d="M 9,12 L 59,12 L 54,20 L 14,20 Z" fill="#070812" stroke="${neonColor}" stroke-width="1.3"/>`;
+          hoodDetails = `<path d="M 27,33 L 41,33 M 28,38 L 40,38 M 29,43 L 39,43" stroke="${neonColor}" stroke-width="1.7" stroke-linecap="round"/>`;
+          stripes = `<path d="M 11,40 L 15,96 M 57,40 L 53,96" stroke="${neonColor}" stroke-width="1.3" opacity="0.9"/>`;
+          break;
+
+        case 'muscleWide': // Gauntlet Hellfire / Dominator GT
+          bodyPath = 'M 9,15 L 59,15 C 62,18 63,28 63,40 L 62,108 C 61,121 54,126 34,127 C 14,126 7,121 6,108 L 5,40 C 5,28 6,18 9,15 Z';
+          rearWindow = 'M 17,30 L 51,30 L 48,45 L 20,45 Z';
+          roof = 'M 18,45 L 50,45 L 50,69 L 18,69 Z';
+          windshield = 'M 17,69 L 51,69 L 53,84 C 42,87 26,87 15,84 Z';
+          spoiler = `<rect x="11" y="13" width="46" height="5" rx="1.5" fill="#0d0e1a" stroke="rgba(255,255,255,0.3)" stroke-width="0.9"/>`;
+          hoodDetails = `<rect x="26" y="92" width="16" height="24" rx="3" fill="#0a0c18" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>`;
+          stripes = `<path d="M 29,16 L 29,125 M 39,16 L 39,125" stroke="rgba(255,255,255,0.45)" stroke-width="2.6"/>`;
+          break;
+
+        case 'superWing': // Infernus / Turismo R
+          bodyPath = 'M 12,15 C 24,13 44,13 56,15 C 61,24 63,44 62,100 C 60,118 52,127 34,128 C 16,127 8,118 6,100 C 5,44 7,24 12,15 Z';
+          rearWindow = 'M 21,29 L 47,29 L 44,50 L 24,50 Z';
+          roof = 'M 20,50 L 48,50 L 46,72 L 22,72 Z';
+          windshield = 'M 18,72 L 50,72 L 53,92 C 42,97 26,97 15,92 Z';
+          spoiler = `<rect x="6" y="11" width="56" height="7" rx="2.5" fill="#090a16" stroke="${neonColor}" stroke-width="1.3"/>`;
+          hoodDetails = `<path d="M 26,34 L 42,34 M 27,40 L 41,40 M 28,46 L 40,46" stroke="rgba(0,0,0,0.75)" stroke-width="2"/>`;
+          stripes = `<path d="M 34,98 L 34,124" stroke="${neonColor}" stroke-width="2" opacity="0.9"/>`;
+          break;
+
+        case 'jdmTuner': // Elegy RH8 / Jester RR
+          bodyPath = 'M 12,16 L 56,16 C 61,22 62,38 62,102 C 61,118 53,126 34,127 C 15,126 7,118 6,102 C 6,38 7,22 12,16 Z';
+          rearWindow = 'M 19,31 L 49,31 L 46,48 L 22,48 Z';
+          roof = 'M 19,48 L 49,48 L 48,70 L 20,70 Z';
+          windshield = 'M 17,70 L 51,70 L 53,88 C 42,92 26,92 15,88 Z';
+          spoiler = `<rect x="7" y="12" width="54" height="6" rx="2" fill="#090a16" stroke="${neonColor}" stroke-width="1.2"/>`;
+          hoodDetails = `<path d="M 19,98 L 27,104 L 22,112 Z M 49,98 L 41,104 L 46,112 Z" fill="#0a0c18"/>`;
+          stripes = `<path d="M 12,26 L 12,110 M 56,26 L 56,110" stroke="${neonColor}" stroke-width="1.4" opacity="0.8"/>`;
+          break;
+
+        case 'porscheGT': // Comet S2
+          bodyPath = 'M 15,16 C 28,13 40,13 53,16 C 60,24 62,48 61,100 C 59,117 50,126 34,127 C 18,126 9,117 7,100 C 6,48 8,24 15,16 Z';
+          rearWindow = 'M 20,32 C 28,29 40,29 48,32 L 46,49 L 22,49 Z';
+          roof = 'M 20,49 L 48,49 L 47,70 L 21,70 Z';
+          windshield = 'M 18,70 L 50,70 L 52,88 C 42,92 26,92 16,88 Z';
+          spoiler = `<path d="M 12,14 C 24,11 44,11 56,14 L 54,20 L 14,20 Z" fill="#0b0c18" stroke="${neonColor}" stroke-width="1.1"/>`;
+          stripes = `<path d="M 34,16 L 34,125" stroke="rgba(255,255,255,0.42)" stroke-width="4.5"/>`;
+          break;
+
+        case 'bugatti': // Adder
+          bodyPath = 'M 15,15 C 27,12 41,12 53,15 C 61,25 63,50 61,102 C 59,119 49,127 34,128 C 19,127 9,119 7,102 C 5,50 7,25 15,15 Z';
+          rearWindow = 'M 23,30 L 45,30 L 43,49 L 25,49 Z';
+          roof = 'M 21,49 L 47,49 L 46,72 L 22,72 Z';
+          windshield = 'M 19,72 L 49,72 L 51,91 C 42,96 26,96 17,91 Z';
+          stripes = `<path d="M 34,14 L 34,127" stroke="rgba(0,0,0,0.68)" stroke-width="3.2"/><path d="M 10,56 C 22,66 46,66 58,56" fill="none" stroke="${neonColor}" stroke-width="1.6"/>`;
+          break;
+
+        case 'evMuscle': // Buffalo EVX
+          bodyPath = 'M 10,15 L 58,15 C 62,19 62,32 62,106 C 61,120 53,126 34,127 C 15,126 7,120 6,106 C 6,32 6,19 10,15 Z';
+          rearWindow = 'M 17,30 L 51,30 L 49,47 L 19,47 Z';
+          roof = 'M 18,47 L 50,47 L 50,71 L 18,71 Z';
+          windshield = 'M 17,71 L 51,71 L 53,87 C 42,90 26,90 15,87 Z';
+          hoodDetails = `<path d="M 20,96 L 34,116 L 48,96" fill="none" stroke="${neonColor}" stroke-width="1.8" opacity="0.9"/>`;
+          break;
+
+        case 'coupeGT': // Banshee GTS
+          bodyPath = 'M 12,15 L 56,15 C 61,22 62,40 61,102 C 60,119 52,126 34,127 C 16,126 8,119 7,102 C 6,40 7,22 12,15 Z';
+          rearWindow = 'M 19,28 L 49,28 L 47,43 L 21,43 Z';
+          roof = 'M 19,43 L 49,43 L 48,66 L 20,66 Z';
+          windshield = 'M 18,66 L 50,66 L 52,82 C 42,86 26,86 16,82 Z';
+          hoodDetails = `<path d="M 24,94 L 24,112 M 44,94 L 44,112" stroke="rgba(0,0,0,0.65)" stroke-width="2.4" stroke-linecap="round"/>`;
+          stripes = `<path d="M 34,15 L 34,125" stroke="#ffffff" stroke-width="4.4" opacity="0.72"/>`;
+          break;
+
+        default: // hyperMid: Turismo Omaggio / Coquette D10 / Osiris
+          bodyPath = 'M 12,15 C 24,13 44,13 56,15 C 62,25 63,46 61,102 C 59,119 50,127 34,128 C 18,127 9,119 7,102 C 5,46 6,25 12,15 Z';
+          rearWindow = 'M 21,29 L 47,29 L 45,49 L 23,49 Z';
+          roof = 'M 20,49 L 48,49 L 46,72 L 22,72 Z';
+          windshield = 'M 18,72 L 50,72 L 53,92 C 42,97 26,97 15,92 Z';
+          spoiler = `<rect x="12" y="13" width="44" height="5" rx="2" fill="#090a16" stroke="${neonColor}" stroke-width="1"/>`;
+          hoodDetails = `<path d="M 24,33 L 44,33 L 41,45 L 27,45 Z" fill="rgba(0,0,0,0.65)" stroke="${neonColor}" stroke-width="0.9"/>`;
+          break;
+      }
+
+      return `
+        <svg viewBox="0 -38 68 192" class="${sizeClass} overflow-visible select-none" aria-label="${esc(m.name)}">
+          <defs>
+            <linearGradient id="p_${id}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#130b24" />
+              <stop offset="22%" stop-color="${bodyColor}" />
+              <stop offset="50%" stop-color="${bodyColor}" />
+              <stop offset="78%" stop-color="${bodyColor}" />
+              <stop offset="100%" stop-color="#130b24" />
+            </linearGradient>
+            <linearGradient id="g_${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0a0e22" />
+              <stop offset="55%" stop-color="#1e293b" />
+              <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.65" />
+            </linearGradient>
+            <linearGradient id="beam_${id}" x1="50%" y1="0%" x2="50%" y2="100%">
+              <stop offset="0%" stop-color="#fef9c3" stop-opacity="0.72" />
+              <stop offset="100%" stop-color="#fef9c3" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="fi_${id}" x1="50%" y1="100%" x2="50%" y2="0%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="35%" stop-color="#FFB800" />
+              <stop offset="75%" stop-color="#FF2A85" />
+              <stop offset="100%" stop-color="#FF2A85" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="fn_${id}" x1="50%" y1="100%" x2="50%" y2="0%">
+              <stop offset="0%" stop-color="#ffffff" />
+              <stop offset="30%" stop-color="#00F0FF" />
+              <stop offset="72%" stop-color="#FF2A85" />
+              <stop offset="100%" stop-color="#7B2CBF" stop-opacity="0" />
+            </linearGradient>
+            <filter id="gl_${id}" x="-45%" y="-45%" width="190%" height="190%">
+              <feGaussianBlur stdDeviation="3.6" result="b" />
+              <feMerge>
+                <feMergeNode in="b" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- CONES DE FARÓIS ILUMINANDO O ASFALTO PARA BAIXO -->
+          <polygon points="15,122 2,154 27,154 24,124" fill="url(#beam_${id})" />
+          <polygon points="53,122 41,154 66,154 44,124" fill="url(#beam_${id})" />
+
+          <!-- CHAMAS DE ESCAPAMENTO CONTÍNUAS PARA CIMA -->
+          <g class="exhaust-up">
+            <path d="M 22,16 L 19,-4 L 23,2 L 26,-8 L 28,16 Z" fill="url(#fi_${id})" />
+            <path d="M 40,16 L 42,-8 L 45,2 L 49,-4 L 46,16 Z" fill="url(#fi_${id})" />
+          </g>
+
+          <!-- EXPLOSÃO NITRO OVERDRIVE PARA CIMA -->
+          <g class="nitro-jet-up">
+            <path d="M 19,16 L 14,-28 L 22,-12 L 26,-36 L 30,16 Z" fill="url(#fn_${id})" filter="url(#gl_${id})" />
+            <path d="M 38,16 L 42,-36 L 46,-12 L 54,-28 L 49,16 Z" fill="url(#fn_${id})" filter="url(#gl_${id})" />
+          </g>
+
+          <!-- NEON UNDERGLOW PULSANTE EMBAIXO DO CARRO -->
+          <ellipse cx="34" cy="72" rx="28" ry="59" fill="${neonColor}" opacity="0.46" filter="url(#gl_${id})" />
+
+          <!-- Rodas discretas nas laterais -->
+          <rect x="2.5" y="26" width="4.5" height="20" rx="2" fill="#07070e" />
+          <rect x="61" y="26" width="4.5" height="20" rx="2" fill="#07070e" />
+          <rect x="2.5" y="92" width="4.5" height="20" rx="2" fill="#07070e" />
+          <rect x="61" y="92" width="4.5" height="20" rx="2" fill="#07070e" />
+
+          <!-- Retrovisores esportivos -->
+          <path d="M 9,80 L 3,76 L 5,83 Z" fill="${bodyColor}" stroke="rgba(255,255,255,0.4)" stroke-width="0.6" />
+          <path d="M 59,80 L 65,76 L 63,83 Z" fill="${bodyColor}" stroke="rgba(255,255,255,0.4)" stroke-width="0.6" />
+
+          <!-- Carroceria Metálica Esculpida -->
+          <path d="${bodyPath}" fill="url(#p_${id})" stroke="rgba(255,255,255,0.42)" stroke-width="1.15" />
+
+          <!-- Brilho Metálico Longitudinal -->
+          <path d="M 15,24 C 13,58 13,92 17,114 C 16,92 16,58 18,24 Z" fill="rgba(255,255,255,0.28)" />
+
+          <!-- Faixas de Corrida & Entradas de Ar -->
+          ${stripes}
+          ${hoodDetails}
+
+          <!-- Vidro Traseiro (parte superior), Teto e Para-brisa (parte inferior) -->
+          <path d="${rearWindow}" fill="url(#g_${id})" stroke="rgba(255,255,255,0.32)" stroke-width="0.8" />
+          <path d="${roof}" fill="${bodyColor}" opacity="0.90" stroke="rgba(255,255,255,0.25)" stroke-width="0.7" />
+          <path d="${windshield}" fill="url(#g_${id})" stroke="rgba(255,255,255,0.45)" stroke-width="0.9" />
+          <!-- Reflexo diagonal no para-brisa -->
+          <path d="M 22,74 L 30,88 M 36,74 L 42,86" stroke="rgba(255,255,255,0.26)" stroke-width="1.6" stroke-linecap="round" />
+
+          <!-- Aerofólio / Spoiler Traseiro -->
+          ${spoiler}
+
+          <!-- Lanternas Traseiras Vermelhas Neon (TOPO) -->
+          <rect x="13" y="14.5" width="12" height="3.2" rx="1.2" fill="#ff1e56" filter="url(#gl_${id})" />
+          <rect x="43" y="14.5" width="12" height="3.2" rx="1.2" fill="#ff1e56" filter="url(#gl_${id})" />
+
+          <!-- Faróis LED Brilhantes (BASE - FRENTE DO CARRO) -->
+          <ellipse cx="18" cy="122" rx="4.2" ry="2.2" fill="#fef9c3" filter="url(#gl_${id})" />
+          <ellipse cx="50" cy="122" rx="4.2" ry="2.2" fill="#fef9c3" filter="url(#gl_${id})" />
+        </svg>
+      `;
+    }
+
+    // =========================================================================
+    // 4. CENÁRIO ANIMADO 60FPS EM HTML5 CANVAS (VICE CITY + AVENIDA + PRAIA)
+    // =========================================================================
+    const cityCanvas = document.getElementById('cityCanvas');
+    const cCtx = cityCanvas.getContext('2d');
+    let canvasW = 1280;
+    let canvasH = 720;
+    let roadScrollOffset = 0;
+    let worldTime = 0;
+
+    // Partículas de velocidade, fumaça e ondas de choque NITRO
+    let speedParticles = [];
+    let nitroBursts = [];
+
+    // Prédios Art Déco fixos (loop contínuo) na lateral esquerda
+    const CITY_BLOCKS = [
+      { h: 155, color: '#1b1133', neon: '#FF2A85', type: 'pool', label: 'VICE 6' },
+      { h: 130, color: '#15122b', neon: '#00F0FF', type: 'helipad', label: 'ALARES' },
+      { h: 165, color: '#201038', neon: '#FFB800', type: 'terrace', label: 'LEONIDA' },
+      { h: 140, color: '#17112e', neon: '#A855F7', type: 'pool', label: 'QUEIJO CLUB' },
+      { h: 150, color: '#1c1030', neon: '#00F0FF', type: 'ac', label: 'OCEAN HOTEL' }
+    ];
+    const CITY_PATTERN_H = CITY_BLOCKS.reduce((s, b) => s + b.h + 24, 0);
+
+    // Guarda-sóis na praia
+    const UMBRELLA_COLORS = ['#FF2A85', '#00F0FF', '#FFB800', '#A855F7', '#FB7185'];
+
+    function resizeCityCanvas() {
+      const worldEl = document.getElementById('raceWorld');
+      const rect = worldEl.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvasW = Math.max(1, Math.floor(rect.width));
+      canvasH = Math.max(1, Math.floor(rect.height));
+
+      cityCanvas.width = Math.floor(canvasW * dpr);
+      cityCanvas.height = Math.floor(canvasH * dpr);
+      cCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Re-popular partículas de velocidade
+      if (speedParticles.length < 36) {
+        speedParticles = [];
+        for (let i = 0; i < 42; i++) {
+          speedParticles.push({
+            rx: LAYOUT.CITY_LEFT + Math.random() * LAYOUT.ROAD_WIDTH,
+            y: Math.random() * canvasH,
+            len: 14 + Math.random() * 26,
+            spd: 2.8 + Math.random() * 4.5,
+            color: i % 3 === 0 ? '#00F0FF' : (i % 3 === 1 ? '#FF2A85' : '#FFB800'),
+            alpha: 0.14 + Math.random() * 0.25
+          });
+        }
+      }
+    }
+
+    function spawnNitroShockwave(laneIndex, yRatio, neonColor) {
+      const roadX = canvasW * LAYOUT.CITY_LEFT;
+      const roadW = canvasW * LAYOUT.ROAD_WIDTH;
+      if(laneIndex<laneOffset() || laneIndex>=laneOffset()+laneCount()) return;
+      const cx = roadX + ((laneIndex-laneOffset() + 0.5) / laneCount()) * roadW;
+      const cy = canvasH * yRatio;
+      nitroBursts.push({
+        x: cx,
+        y: cy,
+        r: 8,
+        maxR: 62,
+        alpha: 0.95,
+        color: neonColor || '#00F0FF',
+        sparks: Array.from({ length: 16 }, () => ({
+          x: cx,
+          y: cy,
+          vx: (Math.random() - 0.5) * 6,
+          vy: -2 - Math.random() * 6,
+          life: 1,
+          color: Math.random() > 0.5 ? '#FFB800' : (neonColor || '#00F0FF')
+        }))
+      });
+    }
+
+    function drawPalmTree(ctx, x, y, radius, swayAngle) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(swayAngle);
+      // Sombra no chão
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.arc(4, 5, radius * 0.9, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 7 Folhas tropicais
+      const fronds = 7;
+      for (let i = 0; i < fronds; i++) {
+        const a = (i / fronds) * Math.PI * 2;
+        ctx.save();
+        ctx.rotate(a);
+        ctx.fillStyle = i % 2 === 0 ? '#14532d' : '#166534';
+        ctx.beginPath();
+        ctx.ellipse(radius * 0.52, 0, radius * 0.56, radius * 0.19, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(radius * 0.92, 0);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.fillStyle = '#451a03';
+      ctx.beginPath();
+      ctx.arc(0, 0, radius * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function renderCityScene(dt) {
+      worldTime += dt;
+      // Rola PARA CIMA (offset diminui) para criar sensação imersiva de carros descendo a avenida em alta velocidade!
+      roadScrollOffset = (roadScrollOffset + dt * 75) % 10000;
+
+      const w = canvasW;
+      const h = canvasH;
+      const roadX = w * LAYOUT.CITY_LEFT;
+      const roadW = w * LAYOUT.ROAD_WIDTH;
+      const beachX = roadX + roadW;
+      const beachW = w - beachX;
+
+      // ---------- 1. LADO ESQUERDO: CIDADE VICE CITY ART DÉCO ----------
+      const cityBg = cCtx.createLinearGradient(0, 0, roadX, 0);
+      cityBg.addColorStop(0, '#0a0717');
+      cityBg.addColorStop(0.82, '#160d2a');
+      cityBg.addColorStop(1, '#25173d'); // Calçada
+      cCtx.fillStyle = cityBg;
+      cCtx.fillRect(0, 0, roadX, h);
+
+      // Calçada e meio-fio esquerdo
+      const sidewalkW = Math.max(24, roadX * 0.18);
+      cCtx.fillStyle = '#1d1633';
+      cCtx.fillRect(roadX - sidewalkW, 0, sidewalkW, h);
+
+      // Prédios Art Déco rolando suavemente para cima
+      const cityScroll = ((roadScrollOffset * 0.55) % CITY_PATTERN_H + CITY_PATTERN_H) % CITY_PATTERN_H;
+      for (let rep = -1; rep <= Math.ceil(h / CITY_PATTERN_H) + 1; rep++) {
+        let curY = rep * CITY_PATTERN_H + cityScroll - CITY_PATTERN_H;
+        for (const b of CITY_BLOCKS) {
+          if (curY + b.h > -40 && curY < h + 40) {
+            const bx = 8;
+            const bw = Math.max(52, roadX - sidewalkW - 18);
+
+            // Sombra do edifício
+            cCtx.fillStyle = 'rgba(0,0,0,0.5)';
+            cCtx.fillRect(bx + 5, curY + 6, bw, b.h);
+
+            // Telhado Art Déco
+            cCtx.fillStyle = b.color;
+            cCtx.fillRect(bx, curY, bw, b.h);
+            cCtx.fillStyle='#0b1020'; cCtx.fillRect(bx+5,curY+5,bw-10,b.h-10);
+            cCtx.fillStyle=b.color; cCtx.fillRect(bx+10,curY+10,bw-20,b.h-20);
+            for(let wy=curY+15;wy<curY+b.h-10;wy+=15){cCtx.fillStyle='#e7bd83';cCtx.globalAlpha=.55;cCtx.fillRect(bx+3,wy,4,7);cCtx.fillRect(bx+bw-7,wy,4,7);cCtx.globalAlpha=1;}
+            cCtx.fillStyle='#46516b';cCtx.fillRect(bx+bw-28,curY+b.h-24,15,12);
+
+            // Borda Neon do Parapeito
+            cCtx.strokeStyle = b.neon;
+            cCtx.lineWidth = 2;
+            cCtx.shadowColor = b.neon;
+            cCtx.shadowBlur = 10;
+            cCtx.strokeRect(bx + 1, curY + 1, bw - 2, b.h - 2);
+            cCtx.shadowBlur = 0;
+
+            // Detalhes no telhado
+            if (b.type === 'pool') {
+              // Piscina iluminada turquesa
+              const px = bx + 10;
+              const py = curY + 26;
+              const pw = bw - 20;
+              const ph = Math.min(54, b.h - 54);
+              const poolGrad = cCtx.createLinearGradient(px, py, px + pw, py + ph);
+              poolGrad.addColorStop(0, '#00f5d4');
+              poolGrad.addColorStop(1, '#0284c7');
+              cCtx.fillStyle = poolGrad;
+              cCtx.fillRect(px, py, pw, ph);
+
+              // Ondinha brilhante na piscina
+              cCtx.strokeStyle = 'rgba(255,255,255,0.45)';
+              cCtx.lineWidth = 1;
+              const waveX = px + ((Math.sin(worldTime * 3 + curY) + 1) * 0.45) * pw;
+              cCtx.beginPath();
+              cCtx.moveTo(waveX, py + 6);
+              cCtx.lineTo(waveX + 12, py + 12);
+              cCtx.stroke();
+            } else if (b.type === 'helipad') {
+              const cx = bx + bw / 2;
+              const cy = curY + b.h / 2 + 8;
+              const r = Math.min(bw, b.h) * 0.28;
+              cCtx.strokeStyle = '#FFB800';
+              cCtx.lineWidth = 2;
+              cCtx.beginPath();
+              cCtx.arc(cx, cy, r, 0, Math.PI * 2);
+              cCtx.stroke();
+              cCtx.fillStyle = '#FFB800';
+              cCtx.font = 'bold 16px "Chakra Petch", sans-serif';
+              cCtx.textAlign = 'center';
+              cCtx.textBaseline = 'middle';
+              cCtx.fillText('H', cx, cy + 1);
+            } else {
+              // Terraço / Ar-condicionado / Lounge
+              cCtx.fillStyle = 'rgba(255,255,255,0.06)';
+              cCtx.fillRect(bx + 10, curY + 28, bw - 20, b.h - 46);
+              cCtx.fillStyle = '#2d234a';
+              cCtx.fillRect(bx + 16, curY + 36, 18, 18);
+              cCtx.fillRect(bx + bw - 34, curY + 36, 18, 18);
+            }
+
+            // Letreiro Neon no telhado
+            cCtx.fillStyle = b.neon;
+            cCtx.shadowColor = b.neon;
+            cCtx.shadowBlur = 8;
+            cCtx.font = '700 10px "Chakra Petch", sans-serif';
+            cCtx.textAlign = 'center';
+            cCtx.textBaseline = 'top';
+            cCtx.fillText(b.label, bx + bw / 2, curY + 8);
+            cCtx.shadowBlur = 0;
+          }
+          curY += b.h + 24;
+        }
+      }
+
+      // Postes de luz e palmeiras na calçada esquerda
+      const lampStep = 110;
+      const lampOff = ((roadScrollOffset * 0.9) % lampStep + lampStep) % lampStep;
+      for (let y = lampOff - lampStep; y < h + lampStep; y += lampStep) {
+        // Halo dourado do poste iluminando a calçada e a pista
+        const lg = cCtx.createRadialGradient(roadX - 6, y, 2, roadX - 6, y, 42);
+        lg.addColorStop(0, 'rgba(255, 184, 0, 0.42)');
+        lg.addColorStop(1, 'rgba(255, 184, 0, 0)');
+        cCtx.fillStyle = lg;
+        cCtx.beginPath();
+        cCtx.arc(roadX - 6, y, 42, 0, Math.PI * 2);
+        cCtx.fill();
+
+        // Ponto luminoso do poste
+        cCtx.fillStyle = '#fef08a';
+        cCtx.beginPath();
+        cCtx.arc(roadX - 6, y, 3, 0, Math.PI * 2);
+        cCtx.fill();
+
+        // Palmeira tropical entre postes
+        drawPalmTree(cCtx, roadX - sidewalkW * 0.58, y + lampStep * 0.5, 14, Math.sin(worldTime * 1.8 + y * 0.02) * 0.08);
+      }
+
+      // ---------- 2. LADO DIREITO: PRAIA VICE BEACH & OCEANO ANIMADO ----------
+      const boardW = Math.max(22, beachW * 0.16);
+      const sandW = beachW * 0.40;
+      const oceanX = beachX + boardW + sandW;
+
+      // Calçadão à beira-mar
+      cCtx.fillStyle = '#24173c';
+      cCtx.fillRect(beachX, 0, boardW, h);
+
+      // Areia dourada ao pôr do sol neon
+      const sandGrad = cCtx.createLinearGradient(beachX + boardW, 0, oceanX, 0);
+      sandGrad.addColorStop(0, '#c28b4c');
+      sandGrad.addColorStop(0.65, '#a8743e');
+      sandGrad.addColorStop(1, '#7c5634');
+      cCtx.fillStyle = sandGrad;
+      cCtx.fillRect(beachX + boardW, 0, sandW + 10, h);
+
+      // Oceano azul-turquesa profundo
+      const seaGrad = cCtx.createLinearGradient(oceanX, 0, w, 0);
+      seaGrad.addColorStop(0, '#00c4d4');
+      seaGrad.addColorStop(0.35, '#0284c7');
+      seaGrad.addColorStop(1, '#082f49');
+      cCtx.fillStyle = seaGrad;
+      cCtx.fillRect(oceanX, 0, w - oceanX, h);
+
+      // Ondas animadas quebrando na areia (espuma branca)
+      for (let layer = 0; layer < 2; layer++) {
+        cCtx.beginPath();
+        const baseX = oceanX + layer * 14;
+        const amp = 6 + layer * 3;
+        cCtx.moveTo(w, 0);
+        cCtx.lineTo(baseX, 0);
+        for (let y = 0; y <= h; y += 16) {
+          const wave = Math.sin(y * 0.025 + worldTime * (2.6 - layer * 0.5) + layer * 2) * amp
+                     + Math.cos(worldTime * 1.8 + layer) * 4;
+          cCtx.lineTo(baseX + wave, y);
+        }
+        cCtx.lineTo(w, h);
+        cCtx.closePath();
+        cCtx.fillStyle = layer === 0 ? 'rgba(0, 240, 255, 0.28)' : 'rgba(2, 132, 199, 0.45)';
+        cCtx.fill();
+
+        // Linha de espuma branca
+        cCtx.strokeStyle = layer === 0 ? 'rgba(255, 255, 255, 0.72)' : 'rgba(186, 230, 253, 0.42)';
+        cCtx.lineWidth = layer === 0 ? 2.5 : 1.5;
+        cCtx.beginPath();
+        for (let y = 0; y <= h; y += 16) {
+          const wave = Math.sin(y * 0.025 + worldTime * (2.6 - layer * 0.5) + layer * 2) * amp
+                     + Math.cos(worldTime * 1.8 + layer) * 4;
+          if (y === 0) cCtx.moveTo(baseX + wave, y);
+          else cCtx.lineTo(baseX + wave, y);
+        }
+        cCtx.stroke();
+      }
+
+      // Iate / Lancha luxuosa navegando no mar
+      const yachtY = ((worldTime * 28) % (h + 180)) - 90;
+      const yachtX = oceanX + (w - oceanX) * 0.58;
+      if (w - oceanX > 36) {
+        // Rastro de espuma branca da lancha
+        cCtx.strokeStyle = 'rgba(255,255,255,0.45)';
+        cCtx.lineWidth = 2;
+        cCtx.beginPath();
+        cCtx.moveTo(yachtX - 4, yachtY - 14);
+        cCtx.lineTo(yachtX - 12, yachtY - 46);
+        cCtx.moveTo(yachtX + 4, yachtY - 14);
+        cCtx.lineTo(yachtX + 12, yachtY - 46);
+        cCtx.stroke();
+
+        // Casco do Iate
+        cCtx.fillStyle = '#ffffff';
+        cCtx.beginPath();
+        cCtx.moveTo(yachtX, yachtY + 18);
+        cCtx.quadraticCurveTo(yachtX + 8, yachtY + 4, yachtX + 6, yachtY - 14);
+        cCtx.lineTo(yachtX - 6, yachtY - 14);
+        cCtx.quadraticCurveTo(yachtX - 8, yachtY + 4, yachtX, yachtY + 18);
+        cCtx.fill();
+        cCtx.fillStyle = '#0ea5e9';
+        cCtx.fillRect(yachtX - 3.5, yachtY - 6, 7, 10);
+      }
+
+      // Guarda-sóis e palmeiras no calçadão direito rolando suavemente
+      const beachStep = 92;
+      const beachOff = ((roadScrollOffset * 0.72) % beachStep + beachStep) % beachStep;
+      let uIdx = 0;
+      for (let y = beachOff - beachStep; y < h + beachStep; y += beachStep) {
+        const ux = beachX + boardW + sandW * (uIdx % 2 === 0 ? 0.36 : 0.62);
+        const uCol = UMBRELLA_COLORS[uIdx % UMBRELLA_COLORS.length];
+
+        // Toalha na areia
+        cCtx.fillStyle = 'rgba(255,255,255,0.28)';
+        cCtx.fillRect(ux - 10, y + 6, 14, 7);
+
+        // Sombra do guarda-sol
+        cCtx.fillStyle = 'rgba(0,0,0,0.28)';
+        cCtx.beginPath();
+        cCtx.arc(ux + 3, y + 3, 10, 0, Math.PI * 2);
+        cCtx.fill();
+
+        // Guarda-sol colorido
+        cCtx.fillStyle = uCol;
+        cCtx.beginPath();
+        cCtx.arc(ux, y, 9.5, 0, Math.PI * 2);
+        cCtx.fill();
+        cCtx.fillStyle = '#ffffff';
+        cCtx.beginPath();
+        cCtx.arc(ux, y, 2.2, 0, Math.PI * 2);
+        cCtx.fill();
+
+        // Palmeira no calçadão direito
+        drawPalmTree(cCtx, beachX + boardW * 0.55, y + 32, 13.5, Math.cos(worldTime * 1.6 + y * 0.02) * 0.08);
+        uIdx++;
+      }
+
+      if(isMobileRace()) {
+        cCtx.fillStyle='#252c37';cCtx.fillRect(0,0,roadX,h);cCtx.fillStyle='#164a53';cCtx.fillRect(beachX,0,beachW,h);
+        for(let y=-90+(roadScrollOffset*.55)%90;y<h;y+=90){
+          cCtx.fillStyle='#101722';cCtx.fillRect(2,y+3,roadX-5,68);cCtx.fillStyle='#586575';cCtx.fillRect(3,y,roadX-7,61);cCtx.fillStyle='#343d4b';cCtx.fillRect(6,y+4,Math.max(1,roadX-13),53);
+          for(let k=8;k<53;k+=10){cCtx.fillStyle='#e8b979';cCtx.fillRect(3,y+k,3,5);}
+          cCtx.fillStyle='#c4a47a';cCtx.fillRect(beachX+2,y,beachW*.55,90);cCtx.fillStyle='#216b70';cCtx.fillRect(beachX+beachW*.65,y,beachW*.35,90);
+          cCtx.strokeStyle='#a3d5cb88';cCtx.beginPath();cCtx.moveTo(beachX+beachW*.7,y+12);cCtx.lineTo(w,y+24);cCtx.stroke();
+          cCtx.fillStyle='#173c32';for(let a=0;a<6;a++){cCtx.save();cCtx.translate(beachX+beachW*.28,y+35);cCtx.rotate(a*Math.PI/3);cCtx.beginPath();cCtx.ellipse(5,0,8,2.8,0,0,Math.PI*2);cCtx.fill();cCtx.restore();}
+          const glow=cCtx.createRadialGradient(roadX,y+76,0,roadX,y+76,24);glow.addColorStop(0,'#ffd49b66');glow.addColorStop(1,'#ffd49b00');cCtx.fillStyle=glow;cCtx.fillRect(0,y+52,roadX+24,48);
+        }
+      }
+      // ---------- 3. CENTRO: SUPER AVENIDA LEONIDA (15 FAIXAS) ----------
+      const asphaltGrad = cCtx.createLinearGradient(roadX, 0, roadX + roadW, 0);
+      asphaltGrad.addColorStop(0, '#20242d');
+      asphaltGrad.addColorStop(0.5, '#30343e');
+      asphaltGrad.addColorStop(1, '#20242d');
+      cCtx.fillStyle = asphaltGrad;
+      cCtx.fillRect(roadX, 0, roadW, h);
+
+      // Faixas alternadas sutis para leitura perfeita das 15 pistas
+      const laneW = roadW / laneCount();
+      for (let i = 0; i < laneCount(); i++) {
+        if (i % 2 === 0) {
+          cCtx.fillStyle = 'rgba(255, 255, 255, 0.018)';
+          cCtx.fillRect(roadX + i * laneW, 0, laneW, h);
+        }
+      }
+
+      // Pavimento com textura estável e marcas de direção
+      cCtx.fillStyle = 'rgba(255,255,255,.045)';
+      for(let i=0;i<240;i++){const x=roadX+((i*137.51)%roadW);const y=(i*73.17+roadScrollOffset)%h;cCtx.fillRect(x,y,2,1);}
+      for(let i=0;i<laneCount();i++){
+        const x=roadX+(i+.5)*laneW;
+        for(let y=70;y<h;y+=150){cCtx.strokeStyle='rgba(210,225,240,.13)';cCtx.lineWidth=2;cCtx.beginPath();cCtx.moveTo(x-6,y+7);cCtx.lineTo(x,y);cCtx.lineTo(x+6,y+7);cCtx.moveTo(x,y);cCtx.lineTo(x,y+20);cCtx.stroke();}
+      }
+      for(let y=0;y<h;y+=18){cCtx.fillStyle=(y/18)%2?'#b9a5a4':'#49334b';cCtx.fillRect(roadX-7,y,5,17);cCtx.fillRect(roadX+roadW+2,y,5,17);}
+      // Bordas laterais Neon da Avenida (Magenta à esquerda, Ciano à direita)
+      cCtx.shadowColor = '#FF2A85';
+      cCtx.shadowBlur = 12;
+      cCtx.fillStyle = '#FF2A85';
+      cCtx.fillRect(roadX - 2, 0, 4, h);
+
+      cCtx.shadowColor = '#00F0FF';
+      cCtx.shadowBlur = 12;
+      cCtx.fillStyle = '#00F0FF';
+      cCtx.fillRect(roadX + roadW - 2, 0, 4, h);
+      cCtx.shadowBlur = 0;
+
+      // Divisórias tracejadas das 15 faixas rolando PARA CIMA em alta velocidade
+      const dashPeriod = 44;
+      const dashOff = ((roadScrollOffset) % dashPeriod + dashPeriod) % dashPeriod;
+      cCtx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+      cCtx.lineWidth = 1.4;
+      cCtx.setLineDash([18, 26]);
+      cCtx.lineDashOffset = -dashOff;
+
+      for (let i = 1; i < laneCount(); i++) {
+        const lx = roadX + i * laneW;
+        cCtx.beginPath();
+        cCtx.moveTo(lx, 0);
+        cCtx.lineTo(lx, h);
+        cCtx.stroke();
+      }
+      cCtx.setLineDash([]);
+
+      // Números das faixas (01–15) pintados no asfalto logo acima da largada
+      const startY = h * LAYOUT.START_Y;
+      const finishY = h * LAYOUT.FINISH_Y;
+
+      cCtx.font = '700 10px "Chakra Petch", sans-serif';
+      cCtx.fillStyle = 'rgba(255,255,255,0.32)';
+      cCtx.textAlign = 'center';
+      cCtx.textBaseline = 'middle';
+      for (let i = 0; i < laneCount(); i++) {
+        cCtx.fillText(String(i + 1 + laneOffset()).padStart(2, '0'), roadX + (i + 0.5) * laneW, startY + 22);
+      }
+
+      // ---------- 4. LARGADA (TOPO), CHECKPOINTS (1..5) E CHEGADA QUADRICULADA (BASE) ----------
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+
+      // Pórtico LARGADA no topo
+      cCtx.fillStyle = 'rgba(255, 42, 133, 0.16)';
+      cCtx.fillRect(roadX, startY - 6, roadW, 12);
+      cCtx.strokeStyle = '#FF2A85';
+      cCtx.lineWidth = 2;
+      cCtx.shadowColor = '#FF2A85';
+      cCtx.shadowBlur = 10;
+      cCtx.beginPath();
+      cCtx.moveTo(roadX, startY);
+      cCtx.lineTo(roadX + roadW, startY);
+      cCtx.stroke();
+      cCtx.shadowBlur = 0;
+
+      // Pill LARGADA centralizada no topo
+      drawRoadBanner(cCtx, roadX + roadW / 2, Math.min(h - 18, startY + 48), isMobileRace()?'LARGADA · 0 VENDAS':'🚦 LARGADA • ALARES (0 VENDAS)', '#FF2A85', '#150826');
+
+      // Checkpoints 1 até indGoal - 1
+      for (let step = 1; step < indGoal; step += Math.max(1, Math.ceil(indGoal / Math.max(2, Math.floor(h / 48))))) {
+        const cy = startY + (step / indGoal) * (finishY - startY);
+        cCtx.strokeStyle = 'rgba(0, 240, 255, 0.24)';
+        cCtx.lineWidth = 1.5;
+        cCtx.setLineDash([8, 8]);
+        cCtx.beginPath();
+        cCtx.moveTo(roadX, cy);
+        cCtx.lineTo(roadX + roadW, cy);
+        cCtx.stroke();
+        cCtx.setLineDash([]);
+
+        // Marcadores laterais do checkpoint
+        drawCheckpointPill(cCtx, roadX - 24, cy, `${step}`);
+        drawCheckpointPill(cCtx, roadX + roadW + 24, cy, `${step}`);
+      }
+
+      // GRANDE LINHA DE CHEGADA QUADRICULADA NEON (BASE)
+      const sq = 11;
+      const rows = 2;
+      const cols = Math.ceil(roadW / sq);
+      cCtx.save();
+      cCtx.shadowColor = '#00F0FF';
+      cCtx.shadowBlur = 16;
+      cCtx.fillStyle = 'rgba(255, 184, 0, 0.25)';
+      cCtx.fillRect(roadX, finishY - sq - 4, roadW, rows * sq + 8);
+      cCtx.shadowBlur = 0;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = roadX + c * sq;
+          const drawW = Math.min(sq, roadX + roadW - x);
+          cCtx.fillStyle = (r + c) % 2 === 0 ? '#ffffff' : '#090A14';
+          cCtx.fillRect(x, finishY - sq + r * sq, drawW, sq);
+        }
+      }
+      // Linhas neon dourada/ciano emoldurando a chegada
+      cCtx.fillStyle = '#FFB800';
+      cCtx.fillRect(roadX, finishY - sq - 2, roadW, 2.5);
+      cCtx.fillStyle = '#00F0FF';
+      cCtx.fillRect(roadX, finishY + sq, roadW, 2.5);
+      cCtx.restore();
+
+      // Arco / Faixa da Chegada logo abaixo da linha quadriculada
+      const finishBannerText = isMobileRace()?`CHEGADA · ${indGoal} VENDAS`:`🏁 CHEGADA • ${indGoal} VENDAS • ${state.config.prizeName.toUpperCase()}`;
+      drawRoadBanner(cCtx, roadX + roadW / 2, Math.max(20, finishY - 48), finishBannerText, '#FFB800', '#160d1f');
+
+      // ---------- 5. PARTÍCULAS DE VELOCIDADE & ONDAS DE CHOQUE NITRO ----------
+      for (const p of speedParticles) {
+        p.y += p.spd * (dt * 60);
+        if (p.y > h + 30) {
+          p.y = -30;
+          p.rx = LAYOUT.CITY_LEFT + Math.random() * LAYOUT.ROAD_WIDTH;
+        }
+        cCtx.strokeStyle = p.color;
+        cCtx.globalAlpha = p.alpha;
+        cCtx.lineWidth = 1.4;
+        cCtx.beginPath();
+        cCtx.moveTo(p.rx * w, p.y);
+        cCtx.lineTo(p.rx * w, p.y + p.len);
+        cCtx.stroke();
+      }
+      cCtx.globalAlpha = 1;
+
+      // Ondas de choque e faíscas NITRO
+      nitroBursts = nitroBursts.filter(b => b.alpha > 0.03);
+      for (const b of nitroBursts) {
+        b.r += (b.maxR - b.r) * 0.14;
+        b.alpha *= 0.91;
+
+        cCtx.save();
+        cCtx.strokeStyle = b.color;
+        cCtx.globalAlpha = b.alpha;
+        cCtx.lineWidth = 3;
+        cCtx.shadowColor = b.color;
+        cCtx.shadowBlur = 14;
+        cCtx.beginPath();
+        cCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        cCtx.stroke();
+
+        for (const sp of b.sparks) {
+          sp.x += sp.vx;
+          sp.y += sp.vy;
+          sp.life *= 0.92;
+          cCtx.fillStyle = sp.color;
+          cCtx.globalAlpha = sp.life;
+          cCtx.fillRect(sp.x, sp.y, 3, 7);
+        }
+        cCtx.restore();
+      }
+    }
+
+    function drawCheckpointPill(ctx, x, y, text) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(9, 10, 22, 0.88)';
+      ctx.strokeStyle = '#00F0FF';
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.roundRect(x - 14, y - 10, 28, 20, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#00F0FF';
+      ctx.font = '700 11px "Chakra Petch", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, x, y + 0.5);
+      ctx.restore();
+    }
+
+    function drawRoadBanner(ctx, cx, cy, text, borderCol, bgCol) {
+      ctx.save();
+      ctx.font = '700 11.5px "Chakra Petch", sans-serif';
+      const tw = Math.min(canvasW-12,ctx.measureText(text).width + 28);
+      const th = 24;
+      ctx.fillStyle = bgCol;
+      ctx.strokeStyle = borderCol;
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = borderCol;
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.roundRect(cx - tw / 2, cy - th / 2, tw, th, 999);
+      ctx.fill();
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, cx, cy + 0.5, Math.max(10,tw-16));
+      ctx.restore();
+    }
+
+    // =========================================================================
+    // 5. CONFETES NEON & DOURADOS
+    // =========================================================================
+    const confCanvas = document.getElementById('confettiCanvas');
+    const confCtx = confCanvas.getContext('2d');
+    let confParticles = [];
+    let confRunning = false;
+
+    function resizeConfetti() {
+      confCanvas.width = window.innerWidth;
+      confCanvas.height = window.innerHeight;
+    }
+
+    function launchConfetti(count = 130) {
+      const cols = ['#FF2A85', '#00F0FF', '#FFB800', '#7B2CBF', '#ffffff', '#34d399'];
+      for (let i = 0; i < count; i++) {
+        confParticles.push({
+          x: Math.random() * confCanvas.width,
+          y: -15 - Math.random() * 140,
+          w: 6 + Math.random() * 8,
+          h: 4 + Math.random() * 5,
+          vx: (Math.random() - 0.5) * 6,
+          vy: 2.5 + Math.random() * 5.2,
+          rot: Math.random() * Math.PI * 2,
+          vr: (Math.random() - 0.5) * 0.24,
+          c: cols[i % cols.length],
+          a: 1
+        });
+      }
+      if (!confRunning) {
+        confRunning = true;
+        requestAnimationFrame(stepConfetti);
+      }
+    }
+
+    function stepConfetti() {
+      confCtx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+      confParticles = confParticles.filter(p => p.y < confCanvas.height + 30 && p.a > 0.02);
+      for (const p of confParticles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.05;
+        p.rot += p.vr;
+        if (p.y > confCanvas.height * 0.74) p.a -= 0.022;
+        confCtx.save();
+        confCtx.globalAlpha = Math.max(0, p.a);
+        confCtx.translate(p.x, p.y);
+        confCtx.rotate(p.rot);
+        confCtx.fillStyle = p.c;
+        confCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        confCtx.restore();
+      }
+      if (confParticles.length > 0) {
+        requestAnimationFrame(stepConfetti);
+      } else {
+        confRunning = false;
+      }
+    }
+
+    // =========================================================================
+    // 6. CÁLCULOS DE RANKING, POSIÇÃO VERTICAL NA PISTA & TRANSIÇÕES
+    // =========================================================================
+    function getRanked(list = state.sellers) {
+      return [...list].sort((a, b) => {
+        if (b.sales !== a.sales) return b.sales - a.sales;
+        if (a.sales > 0 && b.sales > 0 && a.lastSaleAt !== b.lastSaleAt) {
+          return (a.lastSaleAt || Number.MAX_SAFE_INTEGER) - (b.lastSaleAt || Number.MAX_SAFE_INTEGER);
+        }
+        return (a.lane || 0) - (b.lane || 0);
+      });
+    }
+
+    function getTeamTotal(list = state.sellers) {
+      return list.reduce((acc, s) => acc + (Number(s.sales) || 0), 0);
+    }
+
+    function getCarTopRatio(seller, rankedList) {
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+      const span = LAYOUT.FINISH_Y - LAYOUT.START_Y;
+      const sales = Math.max(0, Number(seller.sales) || 0);
+      return LAYOUT.START_Y + Math.min(sales / indGoal, 1) * span - Math.min(4, Math.max(0, sales - indGoal)) * 0.008;
+    }
+
+    function detectStateTransitions() {
+      const ranked = getRanked();
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+      const teamGoal = Math.max(1, Number(state.config.teamGoal) || 60);
+      const teamTotal = getTeamTotal();
+      const starsNow = Math.min(5, Math.floor(teamTotal / (teamGoal / 5)));
+
+      if (!initialSynced) {
+        ranked.forEach((s, i) => {
+          prevRankMap.set(s.id, i + 1);
+          prevSalesMap.set(s.id, s.sales);
+        });
+        prevStarsLit = starsNow;
+        prevTeamGoalDone = teamTotal >= teamGoal;
+        initialSynced = true;
+        return;
+      }
+
+      ranked.forEach((s, i) => {
+        const newRank = i + 1;
+        const oldRank = prevRankMap.get(s.id) ?? newRank;
+        const oldSales = prevSalesMap.get(s.id) ?? s.sales;
+
+        if (s.sales > oldSales) {
+          boostingIds.add(s.id);
+          const yRatio = getCarTopRatio(s, ranked);
+          spawnNitroShockwave(s.lane - 1, yRatio, s.neonColor);
+          spawnScorePopupOnCar(s.id, s.sales >= indGoal ? '🧀 CHEGADA!' : '+1 VENDA! ⚡');
+
+          setTimeout(() => {
+            boostingIds.delete(s.id);
+            const node = document.querySelector(`[data-car-id="${s.id}"]`);
+            if (node) node.classList.remove('boosting');
+          }, 1700);
+
+          if (oldSales < indGoal && s.sales >= indGoal) {
+            launchConfetti(150);
+            radio.playSFX('mission_passed');
+            showMissionBanner(
+              'MISSION PASSED!',
+              `RESPECT + • ${state.config.prizeName.toUpperCase()} CONQUISTADO`,
+              `${s.name.toUpperCase()} • ${s.carName.toUpperCase()}`,
+              `🏁 Cruzou a linha de chegada com ${s.sales} vendas na Avenida Leonida!`
+            );
+          } else if (newRank < oldRank) {
+            radio.playSFX('overtake');
+            showToast('⚡ ULTRAPASSAGEM NITRO!', `${s.name} (${s.carName}) subiu do ${oldRank}º para o ${newRank}º lugar!`, 'cyan');
+          } else {
+            radio.playSFX('nitro');
+          }
+        }
+        prevRankMap.set(s.id, newRank);
+        prevSalesMap.set(s.id, s.sales);
+      });
+
+      if (starsNow > prevStarsLit && teamTotal < teamGoal) {
+        radio.playSFX('wanted_star');
+        showToast(`★ ${starsNow} ESTRELA${starsNow > 1 ? 'S' : ''} GTA!`, `A equipe Alares chegou a ${teamTotal}/${teamGoal} vendas!`, 'gold');
+      }
+      prevStarsLit = starsNow;
+
+      const doneNow = teamTotal >= teamGoal;
+      if (!prevTeamGoalDone && doneNow) {
+        launchConfetti(220);
+        radio.playSFX('mission_passed');
+        showMissionBanner(
+          `META ${teamGoal} CONCLUÍDA!`,
+          'VICE CITY DOMINADA ★★★★★',
+          `EQUIPE ALARES • ${teamTotal} VENDAS`,
+          `🏆 Todas as 5 estrelas GTA acesas no período! Parabéns a toda a equipe!`
+        );
+      }
+      prevTeamGoalDone = doneNow;
+    }
+
+    function spawnScorePopupOnCar(sellerId, text) {
+      const unit = document.querySelector(`[data-car-id="${sellerId}"]`);
+      if (!unit) return;
+      const pop = document.createElement('div');
+      pop.className = 'score-pop-fx pointer-events-none absolute left-1/2 -top-4 z-50 px-2 py-0.5 rounded-full bg-vice-gold text-[#080612] font-hud text-[10px] font-extrabold whitespace-nowrap shadow-lg shadow-amber-400/60';
+      pop.textContent = text;
+      unit.appendChild(pop);
+      setTimeout(() => pop.remove(), 1600);
+    }
+
+    // =========================================================================
+    // 7. RENDERIZAÇÃO DO HUD, 15 CARROS NA PISTA, RANKING & PAINEL ADMIN
+    // =========================================================================
+    function renderAll() {
+      renderTopAndBottomHUD();
+      renderCarsOnHighway();
+      renderRankingDrawer();
+      if (!document.getElementById('adminOverlay').classList.contains('hidden')) {
+        renderAdminTabs();
+      }
+    }
+
+    function renderStarSVGs(litCount, isMax) {
+      return [1, 2, 3, 4, 5].map(idx => {
+        const cls = isMax ? 'wanted-star active max-wanted' : (idx <= litCount ? 'wanted-star active' : 'wanted-star');
+        return `<svg class="w-4 h-4 sm:w-5 sm:h-5 ${cls}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.8l3.09 6.26 6.91 1-5 4.87 1.18 6.88L12 17.55l-6.18 3.26 1.18-6.88-5-4.87 6.91-1L12 1.8z"/></svg>`;
+      }).join('');
+    }
+
+    function renderTopAndBottomHUD() {
+      const cfg = state.config;
+      const total = getTeamTotal();
+      const teamGoal = Math.max(1, Number(cfg.teamGoal) || 60);
+      const indGoal = Math.max(1, Number(cfg.individualGoal) || 6);
+      const pct = Math.min(100, Math.round((total / teamGoal) * 100));
+      const litStars = Math.min(5, Math.floor(total / (teamGoal / 5)));
+      const isMax = total >= teamGoal;
+
+      document.getElementById('hudPrizeChip').textContent = `${cfg.prizeName} (${indGoal} vendas)`;
+      document.getElementById('hudTeamTotal').textContent = total;
+      document.getElementById('hudTeamGoal').textContent = teamGoal;
+      document.getElementById('hudTeamPct').textContent = `(${pct}%)`;
+      document.getElementById('hudTeamBar').style.width = `${pct}%`;
+
+      document.getElementById('hudTeamTotalMob').textContent = total;
+      document.getElementById('hudTeamGoalMob').textContent = teamGoal;
+      document.getElementById('hudTeamBarMob').style.width = `${pct}%`;
+
+      const starsHtml = renderStarSVGs(litStars, isMax);
+      document.getElementById('wantedStarsDesktop').innerHTML = starsHtml;
+      document.getElementById('wantedStarsMobile').innerHTML = starsHtml;
+      const lbl = document.getElementById('wantedLabelDesktop');
+      lbl.textContent = isMax ? '★ VICE CITY DOMINADA ★' : `${litStars}/5 Estrelas`;
+      lbl.className = isMax ? 'font-hud text-[9px] uppercase tracking-wider text-vice-gold font-bold' : 'font-hud text-[9px] uppercase tracking-wider text-slate-400';
+
+      document.getElementById('adminBtnLock').textContent = isAdminAuth ? '🔓' : '🔒';
+
+      // Bottom Mini Pódio & Ticker
+      const ranked = getRanked();
+      const top1 = ranked[0], top2 = ranked[1], top3 = ranked[2];
+      document.getElementById('miniTop1').textContent = top1 ? `🥇 ${top1.name} (${top1.sales})` : '🥇 —';
+      document.getElementById('miniTop2').textContent = top2 ? `🥈 ${top2.name} (${top2.sales})` : '🥈 —';
+      document.getElementById('miniTop3').textContent = top3 ? `🥉 ${top3.name} (${top3.sales})` : '🥉 —';
+
+      const latest = (state.history || [])[0];
+      const ticker = document.getElementById('bottomRadioTicker');
+      if (latest) {
+        ticker.textContent = `${latest.reachedFinish ? '🧀' : (latest.overtook ? '⚡' : '🏎️')} ${latest.sellerName} (${latest.carName}) ${latest.message}`;
+      } else {
+        ticker.textContent = `🏁 Motores ligados na Avenida Leonida! Os 15 carros da Alares aceleram rumo ao ${cfg.prizeName}`;
+      }
+    }
+
+    function renderCarsOnHighway() {
+      const layer = document.getElementById('carsLayer');
+      const ranked = getRanked();
+      const rankMap = new Map();
+      ranked.forEach((s, i) => rankMap.set(s.id, i + 1));
+
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+
+      // Preservar elementos existentes para transição suave no eixo Y!
+      const existing = new Map();
+      layer.querySelectorAll('[data-car-id]').forEach(el => {
+        existing.set(el.getAttribute('data-car-id'), el);
+      });
+
+      state.sellers.forEach((s, idx) => {
+        const laneIndex = (s.lane || idx + 1) - 1;
+        const leftPct = (LAYOUT.CITY_LEFT + ((laneIndex-laneOffset() + 0.5) / laneCount()) * LAYOUT.ROAD_WIDTH) * 100;
+        const topPct = getCarTopRatio(s, ranked) * 100;
+        const rank = rankMap.get(s.id) || (idx + 1);
+        const isWinner = s.sales >= indGoal;
+        const isBoost = boostingIds.has(s.id);
+
+        let unit = existing.get(s.id);
+        const isNew = !unit;
+
+        if (isNew) {
+          unit = document.createElement('div');
+          unit.setAttribute('data-car-id', s.id);
+          unit.className = 'car-unit';
+          const idleDelay = ((laneIndex * 0.08) % 0.44).toFixed(2);
+          unit.innerHTML = `
+            <div class="relative flex flex-col items-center">
+              <!-- Etiqueta HUD Compacta acima do carro (ou abaixo se estiver muito no topo) -->
+              <div class="js-car-tag car-tag rounded-lg px-1.5 py-0.5 text-center w-[66px] sm:w-[74px] mb-1 pointer-events-none">
+                <div class="flex items-center justify-between gap-0.5 leading-none mb-0.5">
+                  <span class="js-rank-pill font-hud text-[9px] font-extrabold px-1 rounded"></span>
+                  <span class="js-sales-pill font-hud text-[9.5px] font-extrabold"></span>
+                </div>
+                <div class="js-name text-[9.5px] sm:text-[10px] font-bold text-white truncate leading-tight"></div>
+                <div class="js-carname font-hud text-[8px] text-vice-cyan truncate leading-none"></div>
+              </div>
+
+              <!-- Carro Top-Down apontando PARA BAIXO -->
+              <div class="car-chassis-live" style="animation-delay:${idleDelay}s">
+                <div class="js-svg-slot"></div>
+              </div>
+            </div>
+          `;
+          unit.addEventListener('click', () => openPilotDetailModal(s.id));
+          layer.appendChild(unit);
+        }
+
+        unit.style.display = laneIndex>=laneOffset() && laneIndex<laneOffset()+laneCount() ? '' : 'none';
+        unit.tabIndex=0; unit.setAttribute('role','button'); unit.setAttribute('aria-label',`${s.name}, ${s.sales} vendas`);
+        unit.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPilotDetailModal(s.id);}};
+        unit.style.left = `${leftPct}%`;
+        unit.style.top = `${topPct}%`;
+        unit.classList.toggle('winner', isWinner);
+        unit.classList.toggle('boosting', isBoost);
+
+        // Atualizar rótulos
+        const rPill = unit.querySelector('.js-rank-pill');
+        if (rank === 1) rPill.className = 'js-rank-pill font-hud text-[9px] font-extrabold px-1 rounded bg-vice-gold text-[#080612]';
+        else if (rank === 2) rPill.className = 'js-rank-pill font-hud text-[9px] font-extrabold px-1 rounded bg-vice-cyan text-[#080612]';
+        else if (rank === 3) rPill.className = 'js-rank-pill font-hud text-[9px] font-extrabold px-1 rounded bg-vice-pink text-white';
+        else rPill.className = 'js-rank-pill font-hud text-[9px] font-extrabold px-1 rounded bg-white/15 text-slate-200';
+        rPill.textContent = isWinner ? `👑#${rank}` : `#${rank}`;
+
+        const sPill = unit.querySelector('.js-sales-pill');
+        sPill.className = `js-sales-pill font-hud text-[9.5px] font-extrabold ${isWinner ? 'text-vice-gold' : 'text-vice-cyan'}`;
+        sPill.textContent = `${s.sales}/${indGoal}`;
+
+        unit.querySelector('.js-name').textContent = s.name;
+        unit.querySelector('.js-carname').textContent = s.carName;
+
+        // Só re-gera SVG se modelo ou cores mudarem
+        const sig = `${s.carModel}|${s.bodyColor}|${s.neonColor}`;
+        const slot = unit.querySelector('.js-svg-slot');
+        if (slot.getAttribute('data-sig') !== sig) {
+          slot.setAttribute('data-sig', sig);
+          slot.innerHTML = buildDownwardCarSVG(s.carModel, s.bodyColor, s.neonColor);
+        }
+      });
+    }
+
+    function renderRankingDrawer() {
+      const ranked = getRanked();
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+      const winners = ranked.filter(s => s.sales >= indGoal).length;
+
+      document.getElementById('drawerWinnersCount').textContent = `🧀 ${winners} / 15 Kits`;
+
+      const podiumGrid = document.getElementById('drawerPodiumGrid');
+      const podiumOrder = [ranked[1], ranked[0], ranked[2]]; // 2º, 1º, 3º
+      const medals = [
+        { pos: '🥈 2º', ring: 'border-vice-cyan/60 bg-vice-cyan/10', h: 'mt-3' },
+        { pos: '🥇 1º', ring: 'border-vice-gold/80 bg-vice-gold/15', h: '' },
+        { pos: '🥉 3º', ring: 'border-vice-pink/60 bg-vice-pink/10', h: 'mt-4' }
+      ];
+
+      podiumGrid.innerHTML = podiumOrder.map((s, idx) => {
+        if (!s) return '';
+        const m = medals[idx];
+        return `
+          <div class="rounded-xl p-2 border ${m.ring} ${m.h} text-center flex flex-col items-center justify-between gap-1 cursor-pointer" data-open-pilot="${s.id}">
+            <span class="font-hud text-[11px] font-extrabold text-white">${m.pos}</span>
+            <div class="my-1">${buildDownwardCarSVG(s.carModel, s.bodyColor, s.neonColor, 'w-7 h-14')}</div>
+            <div class="w-full">
+              <div class="text-[11px] font-bold text-white truncate">${esc(s.name)}</div>
+              <div class="font-hud text-[9px] text-vice-cyan truncate">${esc(s.carName)}</div>
+              <div class="font-gta text-lg text-vice-gold leading-tight">${s.sales}/${indGoal}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('drawerRankingList').innerHTML = ranked.map((s, idx) => {
+        const won = s.sales >= indGoal;
+        return `
+          <div data-open-pilot="${s.id}" class="rounded-xl px-3 py-2 bg-white/[0.04] hover:bg-white/[0.09] border ${won ? 'border-vice-gold/50' : 'border-white/10'} flex items-center justify-between gap-2 cursor-pointer transition">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-6 text-center font-hud text-xs font-extrabold ${idx === 0 ? 'text-vice-gold' : (idx === 1 ? 'text-vice-cyan' : (idx === 2 ? 'text-vice-pink' : 'text-slate-400'))}">#${idx + 1}</span>
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${s.neonColor}; box-shadow:0 0 8px ${s.neonColor};"></span>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-white truncate">${esc(s.name)}</div>
+                <div class="font-hud text-[10px] text-slate-400 truncate">${esc(s.carName)} • Faixa ${String(s.lane).padStart(2, '0')}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              ${won ? `<span class="text-sm" title="Kit Gourmet Conquistado">🧀</span>` : ''}
+              <span class="px-2 py-0.5 rounded-md font-hud text-xs font-extrabold ${won ? 'bg-vice-gold/20 text-vice-gold' : 'bg-white/10 text-vice-cyan'}">${s.sales}/${indGoal}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openPilotDetailModal(sellerId) {
+      const ranked = getRanked();
+      const idx = ranked.findIndex(s => s.id === sellerId);
+      const s = ranked[idx];
+      if (!s) return;
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+      const pct = Math.min(100, Math.round((s.sales / indGoal) * 100));
+      const rem = Math.max(0, indGoal - s.sales);
+      const modelObj = GTA6_MODELS.find(m => m.id === s.carModel) || GTA6_MODELS[0];
+
+      document.getElementById('pilotDetailBody').innerHTML = `
+        <div class="flex items-center gap-3 mb-4">
+          <span class="px-3 py-1 rounded-xl bg-vice-gold text-[#080612] font-gta text-2xl leading-none">#${idx + 1}º</span>
+          <div class="min-w-0">
+            <h3 class="font-gta text-2xl text-white truncate leading-none">${esc(s.name)}</h3>
+            <p class="font-hud text-xs text-vice-cyan truncate mt-0.5">${esc(s.carName)} • <span class="text-slate-400">${esc(modelObj.name)}</span></p>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-[#070714] border border-white/10 py-4 flex items-center justify-center mb-4">
+          ${buildDownwardCarSVG(s.carModel, s.bodyColor, s.neonColor, 'w-14 h-32')}
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between font-hud text-xs">
+            <span class="text-slate-400">Progresso Individual (Faixa ${String(s.lane).padStart(2, '0')})</span>
+            <strong class="${s.sales >= indGoal ? 'text-vice-gold' : 'text-vice-cyan'}">${s.sales} / ${indGoal} vendas</strong>
+          </div>
+          <div class="w-full h-3 rounded-full bg-black/70 border border-white/10 overflow-hidden">
+            <div class="h-full rounded-full transition-all" style="width:${pct}%; background:linear-gradient(90deg, ${s.bodyColor}, ${s.neonColor});"></div>
+          </div>
+          <div class="rounded-xl p-3 text-center font-hud text-xs font-bold ${s.sales >= indGoal ? 'bg-vice-gold/20 border border-vice-gold/55 text-vice-gold' : 'bg-white/5 border border-white/10 text-slate-200'}">
+            ${s.sales >= indGoal
+              ? `🏆 MISSION PASSED! Conquistou o ${esc(state.config.prizeName)}!`
+              : `⚡ Faltam ${rem} venda${rem === 1 ? '' : 's'} para cruzar a chegada e ganhar o ${esc(state.config.prizeName)}!`}
+          </div>
+        </div>
+      `;
+      document.getElementById('pilotDetailModal').classList.remove('hidden');
+    }
+
+    // =========================================================================
+    // 8. PAINEL ADMINISTRATIVO (4 ABAS COMPLETAS)
+    // =========================================================================
+    function renderAdminTabs() {
+      if (currentAdminTab === 'live') renderAdminLiveTab();
+      else if (currentAdminTab === 'bulk') renderAdminBulkTab();
+      else if (currentAdminTab === 'stats') renderAdminStatsTab();
+      else if (currentAdminTab === 'config') renderAdminConfigTab();
+    }
+
+    function renderAdminLiveTab() {
+      const grid = document.getElementById('adminLiveGrid');
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+      const q = (document.getElementById('adminSearch').value || '').trim().toLowerCase();
+      const ranked = getRanked();
+      const rankMap = new Map(ranked.map((s, i) => [s.id, i + 1]));
+
+      let list = [...ranked];
+      if (currentFilter === 'almost') list = list.filter(s => s.sales >= Math.max(1, indGoal - 2) && s.sales < indGoal);
+      else if (currentFilter === 'winners') list = list.filter(s => s.sales >= indGoal);
+      else if (currentFilter === 'zero') list = list.filter(s => s.sales === 0);
+
+      if (q) {
+        list = list.filter(s => {
+          const m = GTA6_MODELS.find(x => x.id === s.carModel);
+          return s.name.toLowerCase().includes(q) || s.carName.toLowerCase().includes(q) || (m && m.name.toLowerCase().includes(q));
+        });
+      }
+
+      if (!list.length) {
+        grid.innerHTML = `<div class="col-span-full hud-modal rounded-2xl p-8 text-center font-hud text-sm text-slate-400">Nenhum colaborador encontrado neste filtro.</div>`;
+        return;
+      }
+
+      grid.innerHTML = list.map(s => {
+        const rank = rankMap.get(s.id);
+        const won = s.sales >= indGoal;
+        const pct = Math.min(100, Math.round((s.sales / indGoal) * 100));
+        const opts = GTA6_MODELS.map(m => `<option value="${m.id}" ${m.id === s.carModel ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+        const swatches = NEON_SWATCHES.map(hex => `
+          <button type="button" data-act="neon" data-id="${s.id}" data-hex="${hex}"
+            class="w-5 h-5 rounded-full cursor-pointer transition ${s.neonColor.toLowerCase() === hex.toLowerCase() ? 'scale-125 ring-2 ring-white' : 'opacity-80 hover:scale-110'}"
+            style="background:${hex}; box-shadow:0 0 6px ${hex};"></button>
+        `).join('');
+
+        return `
+          <div class="hud-modal rounded-2xl p-3.5 border ${won ? 'border-vice-gold/65' : 'border-white/10'} flex flex-col gap-2.5" data-card-id="${s.id}">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-lg font-hud text-xs font-extrabold ${rank === 1 ? 'bg-vice-gold text-[#080612]' : (rank === 2 ? 'bg-vice-cyan text-[#080612]' : (rank === 3 ? 'bg-vice-pink text-white' : 'bg-white/10 text-slate-200'))}">#${rank}º</span>
+                <span class="font-hud text-[11px] text-slate-400">Faixa ${String(s.lane).padStart(2, '0')}</span>
+              </div>
+              <div class="font-gta text-2xl ${won ? 'text-vice-gold' : 'text-white'} leading-none">
+                ${s.sales}<span class="font-hud text-xs text-slate-400">/${indGoal}</span>
+                ${won ? '<span class="ml-1 text-sm">🧀</span>' : ''}
+              </div>
+            </div>
+
+            <!-- Barra Individual -->
+            <div class="w-full h-2 rounded-full bg-black/60 overflow-hidden">
+              <div class="h-full rounded-full transition-all" style="width:${pct}%; background:linear-gradient(90deg,${s.bodyColor},${won ? '#FFB800' : s.neonColor});"></div>
+            </div>
+
+            <!-- Preview Carro + Botões -1 e +1 VENDA -->
+            <div class="rounded-xl bg-[#070814] border border-white/10 px-3 py-2 flex items-center justify-between gap-2">
+              <div class="js-adm-preview shrink-0 flex items-center justify-center w-10">
+                ${buildDownwardCarSVG(s.carModel, s.bodyColor, s.neonColor, 'w-7 h-14')}
+              </div>
+              <div class="flex items-center gap-2 flex-1 justify-end">
+                <button type="button" data-act="minus" data-id="${s.id}" ${s.sales <= 0 ? 'disabled' : ''}
+                  class="w-12 h-11 rounded-xl bg-white/5 hover:bg-rose-500/25 disabled:opacity-30 disabled:pointer-events-none border border-white/15 font-hud font-extrabold text-base text-slate-200 cursor-pointer">−1</button>
+                <button type="button" data-act="plus" data-id="${s.id}"
+                  class="btn-cyan flex-1 max-w-[148px] h-11 px-3 rounded-xl font-hud font-extrabold text-xs sm:text-sm cursor-pointer">
+                  +1 VENDA ⚡
+                </button>
+              </div>
+            </div>
+
+            <!-- Edição Inline Rápida -->
+            <form data-act="save-inline" data-id="${s.id}" class="space-y-2">
+              <div class="grid grid-cols-2 gap-1.5">
+                <input name="name" type="text" required value="${esc(s.name)}" placeholder="Nome Vendedor"
+                  class="px-2.5 py-1.5 rounded-lg bg-[#070814] border border-white/15 focus:border-vice-cyan focus:outline-none text-xs text-white font-semibold" />
+                <input name="carName" type="text" required value="${esc(s.carName)}" placeholder="Nome do Carro"
+                  class="px-2.5 py-1.5 rounded-lg bg-[#070814] border border-vice-cyan/30 focus:border-vice-cyan focus:outline-none text-xs text-vice-cyan font-semibold" />
+              </div>
+              <div class="grid grid-cols-12 gap-1.5 items-center">
+                <select name="carModel" class="col-span-7 px-2 py-1.5 rounded-lg bg-[#070814] border border-white/15 text-[11px] text-white">${opts}</select>
+                <input name="bodyColor" type="color" value="${s.bodyColor}" title="Cor do Carro" class="col-span-2 w-full h-7 rounded bg-[#070814] border border-white/15 cursor-pointer" />
+                <input name="neonColor" type="color" value="${s.neonColor}" title="Cor do Neon" class="js-inline-neon col-span-3 w-full h-7 rounded bg-[#070814] border border-white/15 cursor-pointer" />
+              </div>
+              <div class="flex items-center justify-between gap-2 pt-0.5">
+                <div class="flex items-center gap-1.5">${swatches}</div>
+                <button type="submit" class="btn-pink px-3 py-1 rounded-lg font-hud text-[11px] font-bold text-white cursor-pointer">💾 Salvar</button>
+              </div>
+            </form>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAdminBulkTab() {
+      const container = document.getElementById('bulkRowsContainer');
+      const byLane = [...state.sellers].sort((a, b) => a.lane - b.lane);
+
+      container.innerHTML = byLane.map(s => {
+        const opts = GTA6_MODELS.map(m => `<option value="${m.id}" ${m.id === s.carModel ? 'selected' : ''}>${esc(m.name)}</option>`).join('');
+        return `
+          <div class="rounded-xl bg-[#070814] border border-white/10 p-2.5 grid grid-cols-12 gap-2 items-center" data-bulk-id="${s.id}">
+            <div class="col-span-2 sm:col-span-1 text-center font-hud text-xs font-extrabold text-vice-pink">
+              #${String(s.lane).padStart(2, '0')}
+            </div>
+            <div class="col-span-5 sm:col-span-4">
+              <label class="block font-hud text-[9px] text-slate-400">Vendedor</label>
+              <input data-bk="name" type="text" required value="${esc(s.name)}" class="w-full px-2 py-1.5 rounded-lg bg-[#0f1022] border border-white/15 focus:border-vice-cyan focus:outline-none text-xs text-white font-semibold" />
+            </div>
+            <div class="col-span-5 sm:col-span-4">
+              <label class="block font-hud text-[9px] text-vice-cyan">Nome do Carro</label>
+              <input data-bk="carName" type="text" required value="${esc(s.carName)}" class="w-full px-2 py-1.5 rounded-lg bg-[#0f1022] border border-vice-cyan/30 focus:border-vice-cyan focus:outline-none text-xs text-white font-semibold" />
+            </div>
+            <div class="col-span-10 sm:col-span-2">
+              <label class="block font-hud text-[9px] text-slate-400">Modelo</label>
+              <select data-bk="carModel" class="w-full px-1.5 py-1.5 rounded-lg bg-[#0f1022] border border-white/15 text-[11px] text-white">${opts}</select>
+            </div>
+            <div class="col-span-2 sm:col-span-1">
+              <label class="block font-hud text-[9px] text-slate-400">Neon</label>
+              <input data-bk="neonColor" type="color" value="${s.neonColor}" class="w-full h-7 rounded bg-[#0f1022] border border-white/15 cursor-pointer" />
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAdminStatsTab() {
+      const cfg = state.config;
+      const indGoal = Math.max(1, Number(cfg.individualGoal) || 6);
+      const teamGoal = Math.max(1, Number(cfg.teamGoal) || 60);
+      const total = getTeamTotal();
+      const ranked = getRanked();
+      const winners = ranked.filter(s => s.sales >= indGoal).length;
+      const almost = ranked.filter(s => s.sales >= Math.max(1, indGoal - 2) && s.sales < indGoal);
+
+      document.getElementById('stTeamTotal').textContent = total;
+      document.getElementById('stTeamGoal').textContent = teamGoal;
+      document.getElementById('stTeamPct').textContent = `${Math.min(100, Math.round((total / teamGoal) * 100))}%`;
+      document.getElementById('stWinners').textContent = winners;
+      document.getElementById('stAlmost').textContent = almost.length;
+      document.getElementById('stLeader').textContent = ranked[0] && ranked[0].sales > 0 ? `${ranked[0].name} (${ranked[0].sales})` : 'Largada';
+      document.getElementById('stIndGoalLbl').textContent = indGoal;
+
+      const alBox = document.getElementById('stAlmostList');
+      if (!almost.length) {
+        alBox.innerHTML = `<div class="rounded-xl bg-white/5 p-4 text-center font-hud text-xs text-slate-400">Nenhum vendedor entre ${Math.max(1, indGoal - 2)} e ${indGoal - 1} vendas no momento.</div>`;
+      } else {
+        alBox.innerHTML = almost.map(s => `
+          <div class="rounded-xl bg-vice-pink/15 border border-vice-pink/40 p-2.5 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-white truncate">${esc(s.name)}</div>
+              <div class="font-hud text-[10px] text-vice-cyan truncate">${esc(s.carName)} • ${s.sales}/${indGoal}</div>
+            </div>
+            <button type="button" data-st-plus="${s.id}" class="btn-gold px-2.5 py-1 rounded-lg font-hud text-xs font-extrabold cursor-pointer shrink-0">+1 🧀</button>
+          </div>
+        `).join('');
+      }
+
+      const maxV = Math.max(indGoal + 1, ...ranked.map(s => s.sales));
+      const goalPct = (indGoal / maxV) * 100;
+      document.getElementById('stBarChart').innerHTML = ranked.map((s, i) => {
+        const w = Math.min(100, (s.sales / maxV) * 100);
+        const won = s.sales >= indGoal;
+        return `
+          <div class="flex items-center gap-2">
+            <div class="w-32 sm:w-40 shrink-0 text-right truncate text-xs">
+              <span class="font-hud text-[10px] text-slate-400">#${i + 1}</span>
+              <span class="font-bold text-white ml-1">${esc(s.name)}</span>
+            </div>
+            <div class="relative flex-1 h-5 rounded-lg bg-[#070814] border border-white/10 overflow-hidden">
+              <div class="absolute inset-y-0 w-0.5 bg-vice-gold z-20" style="left:${goalPct}%"></div>
+              <div class="h-full rounded-lg transition-all duration-500" style="width:${Math.max(w, s.sales > 0 ? 5 : 0)}%; background:linear-gradient(90deg,${s.bodyColor},${won ? '#FFB800' : s.neonColor});"></div>
+            </div>
+            <div class="w-11 font-hud text-xs font-extrabold ${won ? 'text-vice-gold' : 'text-vice-cyan'}">${s.sales}${won ? '🧀' : ''}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAdminConfigTab() {
+      const cfg = state.config;
+      document.getElementById('inpPrizeName').value = cfg.prizeName;
+      document.getElementById('inpIndGoal').value = cfg.individualGoal;
+      document.getElementById('inpTeamGoal').value = cfg.teamGoal;
+
+      const hist = state.history || [];
+      document.getElementById('histCountPill').textContent = hist.length;
+      const list = document.getElementById('adminHistoryList');
+      if (!hist.length) {
+        list.innerHTML = `<div class="py-10 text-center font-hud text-xs text-slate-400">Nenhuma venda registrada ainda.</div>`;
+        return;
+      }
+      list.innerHTML = hist.map(ev => {
+        const t = new Date(ev.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        return `
+          <div class="rounded-xl bg-[#070814] border border-white/10 px-3 py-2 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-xs font-bold text-white truncate">
+                <span class="${ev.delta > 0 ? 'text-emerald-400' : 'text-rose-400'} font-hud mr-1">${ev.delta > 0 ? '+' + ev.delta : ev.delta}</span>
+                ${esc(ev.sellerName)} <span class="font-hud text-[10px] text-vice-cyan">(${esc(ev.carName || '')})</span>
+              </div>
+              <div class="text-[11px] text-slate-400 truncate">${esc(ev.message)} • ${t}</div>
+            </div>
+            ${!ev.undone
+              ? `<button type="button" data-undo="${ev.id}" class="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-amber-500/20 border border-white/15 font-hud text-[11px] font-bold text-amber-200 cursor-pointer shrink-0">↩️ Desfazer</button>`
+              : `<span class="font-hud text-[10px] text-slate-500 shrink-0">Desfeito</span>`}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 9. MUTAÇÕES DE ESTADO & SINCRONIZAÇÃO TEMPO REAL (FIRESTORE)
+    // =========================================================================
+    let saving=false, revision=0;
+    async function commitState(nextState) {
+      if (!isAdminAuth || !fbReady || saving || !auth?.currentUser) { showToast('Aguarde', 'Conexão ou gravação pendente. Tente novamente.', 'rose'); return false; }
+      delete nextState.config.adminPassword;
+      if (!validState(nextState)) return false;
+      saving=true; const expected=revision;
+      try {
+        nextState.updatedAt=Date.now(); nextState.revision=expected+1;
+        await runTransaction(db, async tx=>{ const snap=await tx.get(campaignDocRef); if ((snap.exists()?snap.data().revision||0:0)!==expected) throw Error('Dados alterados em outra sessão'); tx.set(campaignDocRef,nextState); });
+        showToast('Sincronizado','Alteração publicada para todos.', 'cyan'); return true;
+      } catch(err) { showToast('Não publicado', 'Confira a conexão ou tente novamente após atualizar a corrida.', 'rose'); return false; }
+      finally {saving=false;}
+    }
+
+    function changeSales(sellerId, delta) {
+      if (!isAdminAuth) return;
+      const next = JSON.parse(JSON.stringify(state));
+      const indGoal = Math.max(1, Number(next.config.individualGoal) || 6);
+      const before = getRanked(next.sellers);
+      const oldRank = before.findIndex(x => x.id === sellerId) + 1;
+
+      const s = next.sellers.find(x => x.id === sellerId);
+      if (!s) return;
+      const oldSales = s.sales;
+      const newSales = Math.max(0, oldSales + delta);
+      if (newSales === oldSales) return;
+
+      s.sales = newSales;
+      s.lastSaleAt = delta > 0 ? Date.now() : (newSales === 0 ? 0 : s.lastSaleAt);
+
+      const after = getRanked(next.sellers);
+      const newRank = after.findIndex(x => x.id === sellerId) + 1;
+      const reachedFinish = delta > 0 && oldSales < indGoal && newSales >= indGoal;
+      const overtook = delta > 0 && newRank < oldRank;
+
+      let message = '';
+      if (reachedFinish) message = `cruzou a linha de chegada com ${newSales} vendas e ganhou o ${next.config.prizeName}!`;
+      else if (overtook) message = `disparou no NITRO e assumiu o ${newRank}º lugar (${newSales} vendas)!`;
+      else if (delta > 0) message = `acelerou para ${newSales} venda${newSales === 1 ? '' : 's'} (${newRank}º lugar).`;
+      else {
+        message = `teve ajuste para ${newSales} venda${newSales === 1 ? '' : 's'}.`;
+        radio.playSFX('minus');
+      }
+
+      next.history = [
+        {
+          id: `h_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          sellerId: s.id,
+          sellerName: s.name,
+          carName: s.carName,
+          delta,
+          newSales,
+          overtook,
+          reachedFinish,
+          undone: false,
+          message,
+          timestamp: Date.now()
+        },
+        ...(next.history || [])
+      ].slice(0, 80);
+
+      commitState(next);
+    }
+
+    function undoHistoryEvent(evId) {
+      if (!isAdminAuth) return;
+      const next = JSON.parse(JSON.stringify(state));
+      const ev = (next.history || []).find(x => x.id === evId);
+      if (!ev || ev.undone) return;
+      const s = next.sellers.find(x => x.id === ev.sellerId);
+      if (!s) return;
+
+      s.sales = Math.max(0, s.sales - ev.delta);
+      if (s.sales === 0) s.lastSaleAt = 0;
+      ev.undone = true;
+      next.history.unshift({
+        id: `h_${Date.now()}_u`,
+        sellerId: s.id,
+        sellerName: s.name,
+        carName: s.carName,
+        delta: -ev.delta,
+        newSales: s.sales,
+        overtook: false,
+        reachedFinish: false,
+        undone: true,
+        message: `lançamento desfeito (agora ${s.sales} vendas).`,
+        timestamp: Date.now()
+      });
+      radio.playSFX('minus');
+      commitState(next);
+    }
+
+    function simulateRandomSale(goToTrack = true) {
+      if (!isAdminAuth) return;
+      const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+      const candidates = state.sellers.filter(s => s.sales < indGoal + 1);
+      const pool = candidates.length ? candidates : state.sellers;
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      if (!pick) return;
+      if (goToTrack) document.getElementById('adminOverlay').classList.add('hidden');
+      setTimeout(() => changeSales(pick.id, 1), goToTrack ? 220 : 10);
+    }
+
+    function toggleAutoDemo() {
+      const btn = document.getElementById('btnToggleAutoDemo');
+      if (autoDemoTimer) {
+        clearInterval(autoDemoTimer);
+        autoDemoTimer = null;
+        btn.textContent = '🎬 Auto-Demo: OFF';
+        showToast('Auto-Demo Pausado', 'Simulação automática encerrada.', 'cyan');
+      } else {
+        document.getElementById('adminOverlay').classList.add('hidden');
+        btn.textContent = '⏹️ Auto-Demo: ON';
+        showToast('🎬 Auto-Demo Ativo!', 'Uma venda aleatória será lançada a cada 3,5 segundos.', 'gold');
+        simulateRandomSale(false);
+        autoDemoTimer = setInterval(() => {
+          if (!isAdminAuth) {
+            clearInterval(autoDemoTimer);
+            autoDemoTimer = null;
+            return;
+          }
+          simulateRandomSale(false);
+        }, 3500);
+      }
+    }
+
+    // =========================================================================
+    // 10. CELEBRAÇÃO MISSION PASSED, TOASTS & UTILITÁRIOS
+    // =========================================================================
+    let bannerTimer = null;
+    function showMissionBanner(title, subtitle, who, detail) {
+      const wrap = document.getElementById('missionBannerWrap');
+      const card = document.getElementById('missionBannerCard');
+      document.getElementById('mbTitle').textContent = title;
+      document.getElementById('mbSubtitle').textContent = subtitle;
+      document.getElementById('mbWho').textContent = who;
+      document.getElementById('mbDetail').textContent = detail;
+
+      wrap.classList.remove('hidden');
+      card.classList.remove('mission-anim');
+      void card.offsetWidth;
+      card.classList.add('mission-anim');
+
+      if (bannerTimer) clearTimeout(bannerTimer);
+      bannerTimer = setTimeout(() => wrap.classList.add('hidden'), 5200);
+    }
+
+    function showToast(title, msg, tone = 'cyan') {
+      const stack = document.getElementById('toastStack');
+      const clsMap = {
+        cyan: 'border-vice-cyan/70 bg-[#080a1c]/95 text-vice-cyan',
+        pink: 'border-vice-pink/70 bg-[#1a0820]/95 text-vice-pink',
+        gold: 'border-vice-gold/75 bg-[#1b1208]/95 text-vice-gold',
+        rose: 'border-rose-500/70 bg-[#1c0814]/95 text-rose-300'
+      };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto rounded-xl border px-3.5 py-2.5 shadow-2xl backdrop-blur-md transition-all duration-300 translate-y-2 opacity-0 ${clsMap[tone] || clsMap.cyan}`;
+      el.innerHTML = `<div class="font-hud text-[10px] uppercase tracking-widest font-extrabold">${esc(title)}</div><div class="text-xs text-slate-100 mt-0.5">${esc(msg)}</div>`;
+      stack.appendChild(el);
+      requestAnimationFrame(() => el.classList.remove('translate-y-2', 'opacity-0'));
+      setTimeout(() => {
+        el.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => el.remove(), 300);
+      }, 3600);
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function downloadFile(content, filename, mime) {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    // =========================================================================
+    // 11. EVENTOS DE INTERFACE
+    // =========================================================================
+    function bindAllEvents() {
+      // Rádio Vice City
+      document.getElementById('btnRadioPlay').addEventListener('click', () => radio.toggle());
+      document.getElementById('btnFloatRadioPrompt').addEventListener('click', () => radio.start());
+      document.getElementById('btnRadioStation').addEventListener('click', () => radio.nextStation());
+      document.getElementById('radioVolumeSlider').addEventListener('input', (e) => {
+        radio.setVolume(Number(e.target.value) / 100);
+      });
+      document.getElementById('btnSfxToggle').addEventListener('click', () => {
+        sfxEnabled = !sfxEnabled;
+        document.getElementById('sfxIcon').textContent = sfxEnabled ? '🔊' : '🔇';
+      });
+
+      // Fullscreen Modo Telão
+      document.getElementById('btnFullscreen').addEventListener('click', async () => {
+        try {
+          if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+          else await document.exitFullscreen();
+        } catch (_) {
+          showToast('Modo Telão', 'Pressione F11 para alternar tela cheia.', 'cyan');
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        document.getElementById('fsBtnText').textContent = document.fullscreenElement ? 'Sair' : 'Telão';
+        setTimeout(resizeCityCanvas, 150);
+      });
+
+      // Ranking Drawer
+      const drawer = document.getElementById('rankingDrawerBackdrop');
+      const openDrawer = () => { renderRankingDrawer(); drawer.classList.remove('hidden'); };
+      document.getElementById('btnOpenRanking').addEventListener('click', openDrawer);
+      document.getElementById('miniPodiumBtn').addEventListener('click', openDrawer);
+      document.getElementById('btnCloseRanking').addEventListener('click', () => drawer.classList.add('hidden'));
+      drawer.addEventListener('click', (e) => {
+        if (e.target === drawer) drawer.classList.add('hidden');
+        const pilotRow = e.target.closest('[data-open-pilot]');
+        if (pilotRow) {
+          drawer.classList.add('hidden');
+          openPilotDetailModal(pilotRow.getAttribute('data-open-pilot'));
+        }
+      });
+
+      // Modal Detalhes do Piloto
+      const pModal = document.getElementById('pilotDetailModal');
+      document.getElementById('btnClosePilotDetail').addEventListener('click', () => pModal.classList.add('hidden'));
+      pModal.addEventListener('click', (e) => { if (e.target === pModal) pModal.classList.add('hidden'); });
+
+      // Dispensar Banner Mission Passed clicando nele
+      document.getElementById('missionBannerCard').addEventListener('click', () => {
+        document.getElementById('missionBannerWrap').classList.add('hidden');
+      });
+
+      // Login Admin
+      const loginModal = document.getElementById('adminLoginModal');
+      const passInput = document.getElementById('adminPassInput');
+
+      document.getElementById('btnOpenAdmin').addEventListener('click', () => {
+        if (isAdminAuth) {
+          document.getElementById('adminOverlay').classList.remove('hidden');
+          renderAdminTabs();
+        } else {
+          document.getElementById('adminLoginErr').classList.add('hidden');
+          passInput.value = '';
+          loginModal.classList.remove('hidden');
+          setTimeout(() => passInput.focus(), 60);
+        }
+      });
+
+      document.getElementById('btnCloseLogin').addEventListener('click', () => loginModal.classList.add('hidden'));
+      loginModal.addEventListener('click', (e) => { if (e.target === loginModal) loginModal.classList.add('hidden'); });
+
+      document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        try {
+          if (!auth || !fbReady || !window.AlaresAdminEmail) throw Error('Configuração ou conexão pendente');
+          const cred=await signInWithEmailAndPassword(auth,window.AlaresAdminEmail,passInput.value);
+          if ((await getDoc(doc(db,'admins',cred.user.uid))).data()?.enabled !== true) {await signOut(auth); throw Error('Sem permissão');}
+          passInput.value='';
+          isAdminAuth = true;
+          loginModal.classList.add('hidden');
+          document.getElementById('adminOverlay').classList.remove('hidden');
+          renderTopAndBottomHUD();
+          renderAdminTabs();
+          showToast('Command Center Liberado', 'Bem-vindo ao painel administrativo da Alares!', 'pink');
+        } catch(err) {
+          document.getElementById('adminLoginErr').classList.remove('hidden');
+          passInput.select();
+        }
+      });
+
+      // Navegação do Painel Admin
+      document.getElementById('btnAdminBackTrack').addEventListener('click', () => {
+        document.getElementById('adminOverlay').classList.add('hidden');
+      });
+      document.getElementById('btnAdminLock').addEventListener('click', () => {
+        isAdminAuth = false;
+        if(auth) signOut(auth).catch(console.error);
+        if (autoDemoTimer) { clearInterval(autoDemoTimer); autoDemoTimer = null; }
+        document.getElementById('adminOverlay').classList.add('hidden');
+        renderTopAndBottomHUD();
+        showToast('Painel Bloqueado', 'Acesso administrativo encerrado.', 'cyan');
+      });
+
+      // Troca das 4 Abas do Admin
+      document.querySelectorAll('.admin-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentAdminTab = btn.getAttribute('data-tab');
+          document.getElementById('adminTabLive').classList.toggle('hidden', currentAdminTab !== 'live');
+          document.getElementById('adminTabBulk').classList.toggle('hidden', currentAdminTab !== 'bulk');
+          document.getElementById('adminTabStats').classList.toggle('hidden', currentAdminTab !== 'stats');
+          document.getElementById('adminTabConfig').classList.toggle('hidden', currentAdminTab !== 'config');
+
+          document.querySelectorAll('.admin-tab').forEach(b => {
+            const act = b === btn;
+            b.className = act
+              ? 'admin-tab whitespace-nowrap px-3.5 py-2 rounded-xl font-hud text-xs sm:text-sm font-bold cursor-pointer bg-vice-pink text-white shadow-md shadow-vice-pink/35'
+              : 'admin-tab whitespace-nowrap px-3.5 py-2 rounded-xl font-hud text-xs sm:text-sm font-bold cursor-pointer text-slate-300 hover:bg-white/10';
+          });
+          renderAdminTabs();
+        });
+      });
+
+      // Busca e Filtros Aba 1
+      document.getElementById('adminSearch').addEventListener('input', () => renderAdminLiveTab());
+      document.getElementById('adminFilterBtns').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-flt]');
+        if (!b) return;
+        currentFilter = b.getAttribute('data-flt');
+        document.querySelectorAll('.flt-btn').forEach(el => {
+          el.className = el === b
+            ? 'flt-btn px-3 py-1.5 rounded-lg font-hud text-xs font-bold cursor-pointer bg-vice-cyan text-[#080812]'
+            : 'flt-btn px-3 py-1.5 rounded-lg font-hud text-xs font-bold cursor-pointer bg-white/5 text-slate-300 hover:bg-white/10';
+        });
+        renderAdminLiveTab();
+      });
+
+      // Delegação Aba 1 (Botões +1/-1, Neon e Edição Inline)
+      const liveGrid = document.getElementById('adminLiveGrid');
+      liveGrid.addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-act]');
+        if (!b) return;
+        const act = b.getAttribute('data-act');
+        const id = b.getAttribute('data-id');
+        if (act === 'plus') changeSales(id, 1);
+        else if (act === 'minus') changeSales(id, -1);
+        else if (act === 'neon') {
+          const hex = b.getAttribute('data-hex');
+          const next = JSON.parse(JSON.stringify(state));
+          const s = next.sellers.find(x => x.id === id);
+          if (s) { s.neonColor = hex; commitState(next); }
+        }
+      });
+
+      liveGrid.addEventListener('change', (e) => {
+        const form = e.target.closest('form[data-act="save-inline"]');
+        if (!form) return;
+        if (['carModel', 'bodyColor', 'neonColor'].includes(e.target.name)) {
+          const fd = new FormData(form);
+          const prev = form.closest('[data-card-id]')?.querySelector('.js-adm-preview');
+          if (prev) prev.innerHTML = buildDownwardCarSVG(String(fd.get('carModel')), String(fd.get('bodyColor')), String(fd.get('neonColor')), 'w-7 h-14');
+        }
+      });
+
+      liveGrid.addEventListener('submit', (e) => {
+        const form = e.target.closest('form[data-act="save-inline"]');
+        if (!form) return;
+        e.preventDefault();
+        const id = form.getAttribute('data-id');
+        const fd = new FormData(form);
+        const next = JSON.parse(JSON.stringify(state));
+        const s = next.sellers.find(x => x.id === id);
+        if (!s) return;
+        s.name = String(fd.get('name') || s.name).trim() || s.name;
+        s.carName = String(fd.get('carName') || s.carName).trim() || s.carName;
+        s.carModel = String(fd.get('carModel') || s.carModel);
+        s.bodyColor = String(fd.get('bodyColor') || s.bodyColor);
+        s.neonColor = String(fd.get('neonColor') || s.neonColor);
+        commitState(next);
+      });
+
+      // Aba 2: Salvar todos os 15 pilotos & carros em lote
+      document.getElementById('bulkEditForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!isAdminAuth) return;
+        const next = JSON.parse(JSON.stringify(state));
+        document.querySelectorAll('[data-bulk-id]').forEach(row => {
+          const id = row.getAttribute('data-bulk-id');
+          const s = next.sellers.find(x => x.id === id);
+          if (!s) return;
+          const nm = row.querySelector('[data-bk="name"]').value.trim();
+          const cn = row.querySelector('[data-bk="carName"]').value.trim();
+          const cm = row.querySelector('[data-bk="carModel"]').value;
+          const nc = row.querySelector('[data-bk="neonColor"]').value;
+          if (nm) s.name = nm;
+          if (cn) s.carName = cn;
+          s.carModel = cm;
+          s.neonColor = nc;
+        });
+        commitState(next);
+      });
+
+      // Aba 3: Botão rápido +1 na lista "Na Cola"
+      document.getElementById('stAlmostList').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-st-plus]');
+        if (b) changeSales(b.getAttribute('data-st-plus'), 1);
+      });
+
+      // Aba 4: Regras, Senha, Demo, Histórico, Export/Import, Reset
+      document.getElementById('cfgCampaignForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!isAdminAuth) return;
+        const next = JSON.parse(JSON.stringify(state));
+        next.config.prizeName = document.getElementById('inpPrizeName').value.trim() || 'Kit Gourmet de Queijo 🧀🍷';
+        next.config.individualGoal = Math.max(1, parseInt(document.getElementById('inpIndGoal').value, 10) || 6);
+        next.config.teamGoal = Math.max(1, parseInt(document.getElementById('inpTeamGoal').value, 10) || 60);
+        commitState(next);
+      });
+
+      document.getElementById('cfgPassForm').addEventListener('submit', async e=>{e.preventDefault(); const p=document.getElementById('inpNewPass').value; if(!isAdminAuth||p.length<8||p!==document.getElementById('inpConfPass').value) return showToast('Senha','Use 8 caracteres e confirme.','rose'); try{await updatePassword(auth.currentUser,p);e.target.reset();showToast('Senha','Atualizada.','cyan');}catch(err){showToast('Senha','Entre novamente antes de alterar.','rose');}});
+      document.getElementById('btnSimSingle').addEventListener('click', () => simulateRandomSale(true));
+      document.getElementById('btnToggleAutoDemo').addEventListener('click', toggleAutoDemo);
+
+      document.getElementById('adminHistoryList').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-undo]');
+        if (b) undoHistoryEvent(b.getAttribute('data-undo'));
+      });
+
+      document.getElementById('btnExpCSV').addEventListener('click', () => {
+        const indGoal = Math.max(1, Number(state.config.individualGoal) || 6);
+        const rows = [['Posicao', 'Faixa', 'Vendedor', 'Nome_Carro', 'Modelo_GTA6', 'Vendas', 'Kit_Gourmet']];
+        getRanked().forEach((s, i) => {
+          const m = GTA6_MODELS.find(x => x.id === s.carModel)?.name || s.carModel;
+          rows.push([i + 1, s.lane, `"${s.name.replace(/"/g, '""')}"`, `"${s.carName.replace(/"/g, '""')}"`, `"${m}"`, s.sales, s.sales >= indGoal ? 'GANHOU' : `Faltam ${indGoal - s.sales}`]);
+        });
+        downloadFile('\uFEFF' + rows.map(r => r.join(',')).join('\n'), 'corrida-alares-gta6.csv', 'text/csv;charset=utf-8;');
+        showToast('CSV Exportado', 'Planilha do ranking baixada!', 'cyan');
+      });
+
+      document.getElementById('btnExpJSON').addEventListener('click', () => {
+        downloadFile(JSON.stringify(state, null, 2), 'corrida-alares-gta6-backup.json', 'application/json');
+        showToast('JSON Exportado', 'Backup completo baixado!', 'cyan');
+      });
+
+      document.getElementById('inpImpJSON').addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const data = JSON.parse(await file.text());
+          if (!validState(data)) throw new Error('Inválido');
+          if (!await commitState(data)) throw Error("Não publicado");
+          showToast('Backup Restaurado', 'Dados importados com sucesso!', 'gold');
+        } catch (_) {
+          showToast('Erro no JSON', 'Arquivo inválido para importação.', 'rose');
+        } finally {
+          e.target.value = '';
+        }
+      });
+
+      // Modal Confirmação Dupla de Reset
+      const rModal = document.getElementById('resetModal');
+      const rStep1 = document.getElementById('resetStep1');
+      const rStep2 = document.getElementById('resetStep2');
+      const rWord = document.getElementById('inpResetWord');
+      const rConf = document.getElementById('btnResetConfirm');
+      const closeReset = () => {
+        rModal.classList.add('hidden');
+        rStep1.classList.remove('hidden');
+        rStep2.classList.add('hidden');
+        rWord.value = '';
+        rConf.disabled = true;
+      };
+
+      document.getElementById('btnOpenResetModal').addEventListener('click', () => { closeReset(); rModal.classList.remove('hidden'); });
+      document.getElementById('btnResetCancel1').addEventListener('click', closeReset);
+      document.getElementById('btnResetCancel2').addEventListener('click', closeReset);
+      document.getElementById('btnResetNext').addEventListener('click', () => {
+        rStep1.classList.add('hidden');
+        rStep2.classList.remove('hidden');
+        setTimeout(() => rWord.focus(), 50);
+      });
+      rWord.addEventListener('input', () => { rConf.disabled = rWord.value.trim().toUpperCase() !== 'ZERAR'; });
+      rConf.addEventListener('click', () => {
+        if (!isAdminAuth || rWord.value.trim().toUpperCase() !== 'ZERAR') return;
+        const next = JSON.parse(JSON.stringify(state));
+        next.sellers = next.sellers.map(s => ({ ...s, sales: 0, lastSaleAt: 0 }));
+        next.history = [];
+        prevTeamGoalDone = false;
+        prevStarsLit = 0;
+        closeReset();
+        commitState(next);
+      });
+
+      window.addEventListener('resize', () => {
+        resizeCityCanvas();
+        resizeConfetti();
+      });
+    }
+
+    // =========================================================================
+    // 12. FIREBASE FIRESTORE TEMPO REAL (NOVA COLEÇÃO alares_gta6_v3 -> GTA6@)
+    // =========================================================================
+    function setSyncPill(text, online) {
+      const el = document.getElementById('syncPill');
+      if (!el) return;
+      el.className = online
+        ? 'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-400/35 text-emerald-300 text-[10px] font-bold'
+        : 'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-300 text-[10px] font-bold';
+      el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${online ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}"></span> ${esc(text)}`;
+    }
+
+    let signInWithEmailAndPassword, signOut, updatePassword, getDoc, runTransaction;
+    async function initRealtimeCloud(){
+      try {
+        const cfg=window.AlaresFirebase;
+        if(!cfg?.apiKey || cfg.apiKey.startsWith('PREENCHER')) {setSyncPill('Configurar Firebase',false);return;}
+        ({initializeApp}=await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js'));
+        ({getAuth,signInWithEmailAndPassword,signOut,updatePassword}=await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js'));
+        ({getFirestore,doc,onSnapshot,getDoc,runTransaction}=await import('https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js'));
+        const app=initializeApp(cfg);auth=getAuth(app);db=getFirestore(app);
+        await signOut(auth);
+        campaignDocRef=doc(db,'campaigns','alares');
+        onSnapshot(campaignDocRef,{includeMetadataChanges:true},snap=>{
+          fbReady=!snap.metadata.fromCache;
+          if(snap.exists() && validState(snap.data())) {state=snap.data();delete state.config.adminPassword;revision=state.revision||0;detectStateTransitions();renderAll();}
+          setSyncPill(fbReady?'Tempo Real':'Offline',fbReady);
+        },err=>{fbReady=false;setSyncPill('Erro de conexão',false);console.error(err);});
+      }catch(err){fbReady=false;setSyncPill('Configuração pendente',false);console.error(err);}
+    }
+
+    // =========================================================================
+    // 13. LOOP PRINCIPAL 60FPS & INICIALIZAÇÃO NO WINDOW LOAD
+    // =========================================================================
+    let lastFrameTs = 0;
+    function animationLoop(ts) {
+      if (!lastFrameTs) lastFrameTs = ts;
+      const dt = Math.min(0.05, (ts - lastFrameTs) / 1000);
+      lastFrameTs = ts;
+      renderCityScene(dt);
+      requestAnimationFrame(animationLoop);
+    }
+
+    window.addEventListener('load', () => {
+      resizeCityCanvas();
+      resizeConfetti();
+      bindAllEvents();
+      const world=document.getElementById('raceWorld');
+      const toggle=document.getElementById('viewToggle');
+      if(innerWidth<700) world.classList.add('overview');
+      const updateView=()=>{if(isMobileRace()){world.classList.toggle('overview',!focusedRace());world.classList.toggle('focus',focusedRace());}else{world.classList.remove('focus');} LAYOUT.CITY_LEFT=isMobileRace()?.09:.16; LAYOUT.ROAD_WIDTH=isMobileRace()?.82:.68; LAYOUT.START_Y=.82; LAYOUT.FINISH_Y=.18; toggle.textContent=world.classList.contains('overview')?'Ampliar pista':'Visão geral'; document.querySelectorAll('[data-camera]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.camera===String(cameraGroup)))); document.getElementById('raceGroupLabel').firstElementChild.textContent=cameraGroup==='all'?'VICE CITY / MAPA GERAL':`VICE CITY / CÂMERA 0${cameraGroup+1}`; resizeCityCanvas();renderCarsOnHighway();};
+      document.querySelectorAll('[data-camera]').forEach(b=>b.addEventListener('click',()=>{cameraGroup=b.dataset.camera==='all'?'all':Number(b.dataset.camera);updateView();}));
+      window.addEventListener('resize',updateView);
+      toggle.addEventListener('click',()=>{cameraGroup=cameraGroup==='all'?0:'all';updateView();});
+      updateView();
+      if(window.ResizeObserver) new ResizeObserver(resizeCityCanvas).observe(world);
+      updateRadioUI();
+      detectStateTransitions();
+      renderAll();
+      initRealtimeCloud();
+      requestAnimationFrame(animationLoop);
+    });
+  </script>
+</body>
+</html>
