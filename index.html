@@ -165,8 +165,8 @@
     .car-unit {
       position: absolute;
       transform: translate(-50%, -50%);
-      transition: top 0.95s cubic-bezier(0.18, 0.92, 0.28, 1);
-      will-change: top;
+      transition: top 0.95s cubic-bezier(0.18, 0.92, 0.28, 1), left 0.75s cubic-bezier(0.18, 0.92, 0.28, 1);
+      will-change: top, left;
       cursor: pointer;
       z-index: 20;
     }
@@ -2211,7 +2211,7 @@
         if (s.sales > oldSales) {
           boostingIds.add(s.id);
           const yRatio = getCarTopRatio(s, ranked);
-          spawnNitroShockwave(s.lane - 1, yRatio, s.neonColor);
+          spawnNitroShockwave(i, yRatio, s.neonColor);
           spawnScorePopupOnCar(s.id, s.sales >= indGoal ? '🧀 CHEGADA!' : '+1 VENDA! ⚡');
 
           setTimeout(() => {
@@ -2348,7 +2348,7 @@
       });
 
       state.sellers.forEach((s, idx) => {
-        const laneIndex = (s.lane || idx + 1) - 1;
+        const laneIndex = (rankMap.get(s.id) || idx + 1) - 1;
         const leftPct = (LAYOUT.CITY_LEFT + ((laneIndex-laneOffset() + 0.5) / laneCount()) * LAYOUT.ROAD_WIDTH) * 100;
         const topPct = getCarTopRatio(s, ranked) * 100;
         const rank = rankMap.get(s.id) || (idx + 1);
@@ -2458,7 +2458,7 @@
               <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${s.neonColor}; box-shadow:0 0 8px ${s.neonColor};"></span>
               <div class="min-w-0">
                 <div class="text-xs font-bold text-white truncate">${esc(s.name)}</div>
-                <div class="font-hud text-[10px] text-slate-400 truncate">${esc(s.carName)} • Faixa ${String(s.lane).padStart(2, '0')}</div>
+                <div class="font-hud text-[10px] text-slate-400 truncate">${esc(s.carName)} • Faixa ${String(idx + 1).padStart(2, '0')}</div>
               </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
@@ -2495,7 +2495,7 @@
 
         <div class="space-y-2">
           <div class="flex items-center justify-between font-hud text-xs">
-            <span class="text-slate-400">Progresso Individual (Faixa ${String(s.lane).padStart(2, '0')})</span>
+            <span class="text-slate-400">Progresso Individual (Faixa ${String(idx + 1).padStart(2, '0')})</span>
             <strong class="${s.sales >= indGoal ? 'text-vice-gold' : 'text-vice-cyan'}">${s.sales} / ${indGoal} vendas</strong>
           </div>
           <div class="w-full h-3 rounded-full bg-black/70 border border-white/10 overflow-hidden">
@@ -2561,7 +2561,7 @@
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded-lg font-hud text-xs font-extrabold ${rank === 1 ? 'bg-vice-gold text-[#080612]' : (rank === 2 ? 'bg-vice-cyan text-[#080612]' : (rank === 3 ? 'bg-vice-pink text-white' : 'bg-white/10 text-slate-200'))}">#${rank}º</span>
-                <span class="font-hud text-[11px] text-slate-400">Faixa ${String(s.lane).padStart(2, '0')}</span>
+                <span class="font-hud text-[11px] text-slate-400">Faixa ${String(rank).padStart(2, '0')}</span>
               </div>
               <div class="font-gta text-2xl ${won ? 'text-vice-gold' : 'text-white'} leading-none">
                 ${s.sales}<span class="font-hud text-xs text-slate-400">/${indGoal}</span>
@@ -3162,7 +3162,7 @@
         const rows = [['Posicao', 'Faixa', 'Vendedor', 'Nome_Carro', 'Modelo_GTA6', 'Vendas', 'Kit_Gourmet']];
         getRanked().forEach((s, i) => {
           const m = GTA6_MODELS.find(x => x.id === s.carModel)?.name || s.carModel;
-          rows.push([i + 1, s.lane, `"${s.name.replace(/"/g, '""')}"`, `"${s.carName.replace(/"/g, '""')}"`, `"${m}"`, s.sales, s.sales >= indGoal ? 'GANHOU' : `Faltam ${indGoal - s.sales}`]);
+          rows.push([i + 1, i + 1, `"${s.name.replace(/"/g, '""')}"`, `"${s.carName.replace(/"/g, '""')}"`, `"${m}"`, s.sales, s.sales >= indGoal ? 'GANHOU' : `Faltam ${indGoal - s.sales}`]);
         });
         downloadFile('\uFEFF' + rows.map(r => r.join(',')).join('\n'), 'corrida-alares-gta6.csv', 'text/csv;charset=utf-8;');
         showToast('CSV Exportado', 'Planilha do ranking baixada!', 'cyan');
